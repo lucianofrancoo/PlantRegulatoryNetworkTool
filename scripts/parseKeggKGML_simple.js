@@ -5,8 +5,8 @@
  * Usage (WSL): node scripts/parseKeggKGML_simple.js ath04075.xml public/data/pathways/aba ABA
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 // Hormone-related compound IDs from KEGG
 const HORMONE_COMPOUNDS = {
@@ -212,7 +212,7 @@ function writeTSV(filePath, data, columns) {
     const header = columns.join('\t');
     const rows = data.map(row => columns.map(col => row[col] || '').join('\t'));
     const content = [header, ...rows].join('\n');
-    fs.writeFileSync(filePath, 'utf8');
+    fs.writeFileSync(filePath, content, 'utf8');
     console.log(`  Written: ${filePath} (${data.length} rows)`);
 }
 

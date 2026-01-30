@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { IntegratedInteraction, NetworkColorMode, NetworkLayoutMode, PathwayMapping, HubMapping } from '../types';
+import { PathwayData } from '../services/pathwayLoader';
 
 interface NetworkGraphProps {
   data: IntegratedInteraction[];
@@ -11,17 +12,20 @@ interface NetworkGraphProps {
   onToggleSource: (source: string) => void;
   graphScope: 'global' | 'direct' | 'cascade';
   onSetGraphScope: (scope: 'global' | 'direct' | 'cascade') => void;
+  pathwayData?: PathwayData | null;
 }
 
 const NetworkGraph: React.FC<NetworkGraphProps> = ({
   data, pathwayMapping, hubMapping,
   selectedSources, onToggleSource,
-  graphScope, onSetGraphScope
+  graphScope, onSetGraphScope,
+  pathwayData
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [colorMode, setColorMode] = useState<NetworkColorMode>('source');
   const [layoutMode, setLayoutMode] = useState<NetworkLayoutMode>('hierarchical');
   const [showLabels, setShowLabels] = useState(true);
+  const [isPathwayMode, setIsPathwayMode] = useState(false);
 
   useEffect(() => {
     if (!svgRef.current || data.length === 0) return;
@@ -154,62 +158,62 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({
     });
 
     return () => { simulation.stop(); };
-  }, [data, colorMode, layoutMode, pathwayMapping, hubMapping, showLabels]);
+  }, [data, colorMode, layoutMode, pathwayMapping, hubMapping, showLabels, pathwayData, isPathwayMode]);
 
   return (
-    <div className="bg-white rounded-[40px] shadow-sm border border-slate-200 flex flex-col overflow-hidden h-[800px] relative animate-in fade-in duration-500">
-      <div className="p-8 border-b border-slate-100 flex flex-wrap items-center justify-between gap-6 bg-slate-50/40">
+    <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl shadow-2xl border border-slate-700 flex flex-col overflow-hidden h-[800px] relative animate-in fade-in duration-500">
+      <div className="p-8 border-b border-slate-700 flex flex-wrap items-center justify-between gap-6 bg-slate-900/50 backdrop-blur-sm">
         <div className="flex flex-col gap-2">
-          <div><h3 className="text-xl font-black text-slate-800 tracking-tight">Visualización de Red</h3></div>
+          <div><h3 className="text-xl font-black text-white tracking-tight">Network Visualization</h3></div>
           {/* Graph Scope Controls */}
-          <div className="flex items-center gap-1 bg-white rounded-xl border border-slate-200 p-1 shadow-sm w-fit">
-            <button onClick={() => onSetGraphScope('global')} className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${graphScope === 'global' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:bg-slate-50'}`}>Global</button>
-            <button onClick={() => onSetGraphScope('direct')} className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${graphScope === 'direct' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:bg-slate-50'}`}>Directos</button>
-            <button onClick={() => onSetGraphScope('cascade')} className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${graphScope === 'cascade' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:bg-slate-50'}`}>Cascada</button>
+          <div className="flex items-center gap-1 bg-slate-800/50 rounded-xl border border-slate-700 p-1 shadow-sm w-fit">
+            <button onClick={() => onSetGraphScope('global')} className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${graphScope === 'global' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'text-slate-400 hover:bg-slate-700'}`}>Global</button>
+            <button onClick={() => onSetGraphScope('direct')} className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${graphScope === 'direct' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'text-slate-400 hover:bg-slate-700'}`}>Direct</button>
+            <button onClick={() => onSetGraphScope('cascade')} className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${graphScope === 'cascade' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'text-slate-400 hover:bg-slate-700'}`}>Cascade</button>
           </div>
         </div>
 
         <div className="flex flex-col items-end gap-3">
           {/* Source Toggles (Moved from Sidebar) */}
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold text-slate-400 uppercase mr-1">Fuentes:</span>
+            <span className="text-[10px] font-bold text-emerald-400 uppercase mr-1">Sources:</span>
             {(['TARGET', 'DAP', 'CHIP'] as const).map(s => (
               <button
                 key={s}
                 onClick={() => onToggleSource(s)}
-                className={`px-2 py-1 rounded text-[10px] font-bold border flex items-center gap-1.5 transition-all ${selectedSources.includes(s) ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-400 border-slate-200'}`}
+                className={`px-2 py-1 rounded text-[10px] font-bold border flex items-center gap-1.5 transition-all ${selectedSources.includes(s) ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/30' : 'bg-slate-800 text-slate-400 border-slate-700'}`}
               >
-                <span className={`w-1.5 h-1.5 rounded-full ${s === 'TARGET' ? 'bg-emerald-400' : s === 'DAP' ? 'bg-blue-400' : 'bg-violet-400'}`}></span>
+                <span className={`w-1.5 h-1.5 rounded-full ${s === 'TARGET' ? 'bg-emerald-300' : s === 'DAP' ? 'bg-blue-300' : 'bg-violet-300'}`}></span>
                 {s}
               </button>
             ))}
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex bg-white rounded-2xl border border-slate-200 p-1.5 shadow-sm">
-              <button onClick={() => setLayoutMode('force')} className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${layoutMode === 'force' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500'}`}>Libre</button>
-              <button onClick={() => setLayoutMode('hierarchical')} className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${layoutMode === 'hierarchical' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500'}`}>Cascada</button>
-              <button onClick={() => setLayoutMode('grid')} className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${layoutMode === 'grid' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500'}`}>Grid</button>
+            <div className="flex bg-slate-800/50 rounded-2xl border border-slate-700 p-1.5 shadow-sm">
+              <button onClick={() => setLayoutMode('force')} className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${layoutMode === 'force' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'text-slate-400'}`}>Free</button>
+              <button onClick={() => setLayoutMode('hierarchical')} className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${layoutMode === 'hierarchical' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'text-slate-400'}`}>Cascade</button>
+              <button onClick={() => setLayoutMode('grid')} className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${layoutMode === 'grid' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'text-slate-400'}`}>Grid</button>
             </div>
-            <div className="flex bg-white rounded-2xl border border-slate-200 p-1.5 shadow-sm">
-              <button onClick={() => setColorMode('source')} className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${colorMode === 'source' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500'}`}>Fuente</button>
-              <button onClick={() => setColorMode('pathway')} className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${colorMode === 'pathway' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500'}`}>Procesos</button>
+            <div className="flex bg-slate-800/50 rounded-2xl border border-slate-700 p-1.5 shadow-sm">
+              <button onClick={() => setColorMode('source')} className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${colorMode === 'source' ? 'bg-slate-700 text-white shadow-lg' : 'text-slate-400'}`}>Source</button>
+              <button onClick={() => setColorMode('pathway')} className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${colorMode === 'pathway' ? 'bg-slate-700 text-white shadow-lg' : 'text-slate-400'}`}>Processes</button>
             </div>
-            <button onClick={() => setShowLabels(!showLabels)} className={`p-2.5 rounded-2xl border transition-all ${showLabels ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-white border-slate-200 text-slate-400'}`}>
+            <button onClick={() => setShowLabels(!showLabels)} className={`p-2.5 rounded-2xl border transition-all ${showLabels ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'bg-slate-800 border-slate-700 text-slate-400'}`}>
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" /></svg>
             </button>
           </div>
         </div>
       </div>
-      <div className="relative flex-1 bg-white">
-        <div className="absolute top-8 left-8 p-6 bg-white/70 backdrop-blur-md border border-slate-100 rounded-[32px] z-10 space-y-4 pointer-events-none shadow-2xl">
-          <div><div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Simbología</div><div className="space-y-2">
-            <div className="flex items-center gap-3"><div className="w-4 h-4 bg-slate-800" style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}></div><span className="text-[11px] font-black text-slate-700">Regulador</span></div>
-            <div className="flex items-center gap-3"><div className="w-4 h-4 rounded-full border-2 border-slate-400 bg-white"></div><span className="text-[11px] font-black text-slate-700">Diana</span></div>
-            <div className="flex items-center gap-3"><div className="w-5 h-5 rounded-full bg-indigo-50 border border-indigo-200 border-dashed"></div><span className="text-[11px] font-black text-indigo-600">Hub (Ruta)</span></div>
+      <div className="relative flex-1 bg-slate-950/50">
+        <div className="absolute top-8 left-8 p-6 bg-slate-900/80 backdrop-blur-md border border-slate-700 rounded-3xl z-10 space-y-4 pointer-events-none shadow-2xl">
+          <div><div className="text-[10px] font-black uppercase tracking-widest text-emerald-400 mb-3">Legend</div><div className="space-y-2">
+            <div className="flex items-center gap-3"><div className="w-4 h-4 bg-slate-700" style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}></div><span className="text-[11px] font-black text-slate-300">Regulator</span></div>
+            <div className="flex items-center gap-3"><div className="w-4 h-4 rounded-full border-2 border-slate-500 bg-slate-900"></div><span className="text-[11px] font-black text-slate-300">Target</span></div>
+            <div className="flex items-center gap-3"><div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/40 border-dashed"></div><span className="text-[11px] font-black text-emerald-400">Hub (Pathway)</span></div>
           </div></div>
           {colorMode === 'pathway' && (
-            <div className="pt-2"><div className="text-[10px] font-black uppercase text-slate-400 mb-2">Hormonas</div><div className="grid grid-cols-2 gap-2 text-[10px] font-bold">
+            <div className="pt-2"><div className="text-[10px] font-black uppercase text-emerald-400 mb-2">Hormones</div><div className="grid grid-cols-2 gap-2 text-[10px] font-bold">
               <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>ABA</div><div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>AUX</div>
               <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>JAS</div><div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-amber-500"></div>ETH</div>
             </div></div>

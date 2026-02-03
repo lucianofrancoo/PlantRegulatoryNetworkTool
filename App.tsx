@@ -3,6 +3,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { IntegratedInteraction, AnalysisResult, AppView, PathwayMapping, HubMapping } from './types';
 import StatsPanel from './components/StatsPanel';
 import NetworkVisualization from './components/NetworkVisualization';
+import EnrichmentPanel from './components/EnrichmentPanel';
 import PathwaySelector from './components/PathwaySelector';
 import { analyzeNetwork } from './services/geminiService';
 import { loadIntegratedData } from './services/dataLoader';
@@ -220,6 +221,13 @@ const App: React.FC = () => {
             Network View
           </button>
 
+          <button onClick={() => setActiveView('enrichment')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${activeView === 'enrichment' ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30' : 'hover:bg-slate-800 text-slate-400'}`}>
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3v18h18M7 13l3-3 4 4 5-6" />
+            </svg>
+            Enrichment
+          </button>
+
           <div className="pt-6 border-t border-slate-800 mt-4">
             <PathwaySelector onPathwayChange={setPathwayData} />
           </div>
@@ -342,6 +350,13 @@ const App: React.FC = () => {
               data={filteredData}
               pathwayMapping={pathwayMapping}
               pathwayData={pathwayData}
+            />
+          ) : activeView === 'enrichment' ? (
+            <EnrichmentPanel
+              data={data}
+              selectedSources={selectedSources}
+              minConfidence={minConfidence}
+              goAnnotations={goAnnotations}
             />
           ) : (
             <div className="bg-white p-12 rounded-[48px] border border-slate-100 shadow-2xl max-w-4xl mx-auto mt-10 animate-in zoom-in-95 duration-500">

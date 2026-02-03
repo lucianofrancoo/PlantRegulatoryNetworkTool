@@ -1,0 +1,45 @@
+from	to	type	regulation	subtype
+110	49	PPrel	repression	inhibition,ubiquitination
+49	51	PPrel	unknown	dissociation
+51	127	GErel	activation	expression
+51	126	GErel	activation	expression
+51	128	GErel	activation	expression
+19	50	PPrel	activation	activation,phosphorylation
+50	58	PPrel	activation	activation,phosphorylation
+58	112	GErel	activation	expression
+15	21	PCrel	unknown	
+21	92	PPrel	activation	activation
+115	92	PPrel	repression	inhibition,ubiquitination
+92	116	PPrel	unknown	dissociation
+60	62	PPrel	repression	inhibition
+62	67	PPrel	repression	inhibition,dephosphorylation
+67	137	PPrel	activation	activation
+12	33	PPrel	activation	activation
+33	34	PPrel	repression	inhibition,indirect effect
+34	35	PPrel	activation	activation,phosphorylation
+35	36	PPrel	activation	activation,indirect effect
+36	39	PPrel	activation	activation
+42	39	PPrel	repression	inhibition,ubiquitination
+39	47	PPrel	activation	activation
+71	74	PPrel	activation	activation
+74	70	PPrel	repression	inhibition
+70	73	PPrel	repression	inhibition,phosphorylation
+73	129	GErel	activation	expression
+73	125	GErel	activation	expression
+120	88	PPrel	repression	inhibition,ubiquitination
+88	27	PPrel	unknown	dissociation
+85	84	PPrel	activation	activation
+84	122	GErel	activation	expression
+180	183	PPrel	activation	activation,phosphorylation
+180	49	PPrel	activation	activation,phosphorylation
+180	186	PPrel	activation	activation,phosphorylation
+180	187	PPrel	repression	inhibition,phosphorylation
+180	188	PPrel	repression	inhibition,phosphorylation
+186	197	PPrel	activation	activation,phosphorylation
+203	216	PPrel	activation	activation
+216	218	PPrel	activation	activation,phosphorylation
+203	208	PPrel	activation	compound,activation
+208	206	PPrel	activation	compound,activation
+206	210	PPrel	activation	activation
+92	234	PPrel	unknown	dissociation
+116	231	GErel	repression	repression

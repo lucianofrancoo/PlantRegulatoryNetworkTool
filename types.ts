@@ -59,7 +59,7 @@ export type AnalysisResult = {
   insights: string[];
 };
 
-export type AppView = 'explorer' | 'network' | 'ai';
+export type AppView = 'explorer' | 'network' | 'enrichment' | 'ai';
 
 export type NetworkColorMode = 'source' | 'regulation' | 'pathway';
 export type NetworkLayoutMode = 'force' | 'hierarchical';

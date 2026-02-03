@@ -8,6 +8,16 @@ import { analyzeNetwork } from './services/geminiService';
 import { loadIntegratedData } from './services/dataLoader';
 import { PathwayData } from './services/pathwayLoader';
 
+
+function useDebouncedValue<T>(value: T, delayMs: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebounced(value), delayMs);
+    return () => window.clearTimeout(timer);
+  }, [value, delayMs]);
+  return debounced;
+}
+
 const App: React.FC = () => {
   const [data, setData] = useState<IntegratedInteraction[]>([]);
   const [pathwayMapping, setPathwayMapping] = useState<PathwayMapping>({});
@@ -21,6 +31,7 @@ const App: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<AnalysisResult | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebouncedValue(searchTerm, 350);
   const [minConfidence, setMinConfidence] = useState(1);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedPathway, setSelectedPathway] = useState<string>('all');
@@ -71,7 +82,7 @@ const App: React.FC = () => {
 
   const filteredData = useMemo(() => {
     let output = data.filter(i => {
-      const matchesSearch = i.tf.toUpperCase().includes(searchTerm.toUpperCase()) || i.target.toUpperCase().includes(searchTerm.toUpperCase());
+      const matchesSearch = i.tf.toUpperCase().includes(debouncedSearchTerm.toUpperCase()) || i.target.toUpperCase().includes(debouncedSearchTerm.toUpperCase());
       const matchesConfidence = i.evidenceCount >= minConfidence;
 
       let matchesPathway = true;
@@ -104,7 +115,7 @@ const App: React.FC = () => {
       }
     } else {
       // Direct or Cascade requires a "Center"
-      const center = priorityTfFilter || (output.some(i => i.tf.toUpperCase() === searchTerm.toUpperCase()) ? searchTerm.toUpperCase() : null);
+      const center = priorityTfFilter || (output.some(i => i.tf.toUpperCase() === debouncedSearchTerm.toUpperCase()) ? debouncedSearchTerm.toUpperCase() : null);
 
       if (center) {
         if (graphScope === 'direct') {
@@ -121,7 +132,7 @@ const App: React.FC = () => {
     }
 
     return output;
-  }, [data, searchTerm, minConfidence, selectedPathway, pathwayMapping, selectedGoTerm, goAnnotations, priorityTfFilter, selectedSources, graphScope]);
+  }, [data, debouncedSearchTerm, minConfidence, selectedPathway, pathwayMapping, selectedGoTerm, goAnnotations, priorityTfFilter, selectedSources, graphScope]);
 
   const handleDownloadTSV = () => {
     const headers = ['TF', 'Target', 'Evidence_Sources', 'Direction', 'Evidence_Count', 'Processes'];

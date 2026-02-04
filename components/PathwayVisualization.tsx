@@ -6,12 +6,14 @@ import { IntegratedInteraction } from '../types';
 interface PathwayVisualizationProps {
     pathwayData: PathwayData;
     regulatoryData?: IntegratedInteraction[];
+    geneMapping?: Record<string, string>;
 }
 
-export default function PathwayVisualization({ pathwayData, regulatoryData }: PathwayVisualizationProps) {
+export default function PathwayVisualization({ pathwayData, regulatoryData, geneMapping = {} }: PathwayVisualizationProps) {
     const svgRef = useRef<SVGSVGElement>(null);
     const [showLabels, setShowLabels] = useState(true);
     const [highlightRegulated, setHighlightRegulated] = useState(true);
+    const zoomRef = useRef<any>(null);
 
     const nodeContentById = useMemo(() => {
         const map = new Map<string, string[]>();
@@ -57,6 +59,19 @@ export default function PathwayVisualization({ pathwayData, regulatoryData }: Pa
 
         svg.attr('viewBox', `${minX} ${minY} ${width} ${height}`);
 
+        // Create main group for zoom/pan
+        const mainGroup = svg.append('g').attr('class', 'main-group');
+
+        // Zoom and Pan behavior
+        const zoom = d3.zoom<SVGSVGElement, unknown>()
+            .scaleExtent([0.1, 10]) // Allow zoom from 10% to 1000%
+            .on('zoom', (event) => {
+                mainGroup.attr('transform', event.transform);
+            });
+
+        svg.call(zoom as any);
+        zoomRef.current = { svg, zoom }; // Save for button controls
+
         // Check if a node has regulatory data
         const isRegulated = (nodeId: string): boolean => {
             const content = nodeContentById.get(nodeId) || [];
@@ -66,8 +81,25 @@ export default function PathwayVisualization({ pathwayData, regulatoryData }: Pa
             return false;
         };
 
+        // Get regulated and non-regulated genes for a node
+        const getRegulatedGenesInNode = (nodeId: string): { regulated: string[], nonRegulated: string[] } => {
+            const content = nodeContentById.get(nodeId) || [];
+            const regulated: string[] = [];
+            const nonRegulated: string[] = [];
+
+            content.forEach(gene => {
+                if (regulatedGenes.has(gene.toUpperCase())) {
+                    regulated.push(gene);
+                } else {
+                    nonRegulated.push(gene);
+                }
+            });
+
+            return { regulated, nonRegulated };
+        };
+
         // Define gradient for compounds (PhytoLearning style)
-        const defs = svg.append('defs');
+        const defs = mainGroup.append('defs');
 
         const compoundGradient = defs.append('radialGradient')
             .attr('id', 'compound-gradient')
@@ -102,7 +134,7 @@ export default function PathwayVisualization({ pathwayData, regulatoryData }: Pa
         feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
 
         // Draw edges first (so they appear behind nodes)
-        const edgeGroup = svg.append('g').attr('class', 'edges');
+        const edgeGroup = mainGroup.append('g').attr('class', 'edges');
 
         pathwayData.edges.forEach(edge => {
             const sourceNode = pathwayData.nodes.find(n => n.node_id === edge.from);
@@ -144,40 +176,57 @@ export default function PathwayVisualization({ pathwayData, regulatoryData }: Pa
         });
 
         // Draw nodes
-        const nodeGroup = svg.append('g').attr('class', 'nodes');
+        const nodeGroup = mainGroup.append('g').attr('class', 'nodes');
 
         pathwayData.nodes.forEach(node => {
             const g = nodeGroup.append('g')
                 .attr('transform', `translate(${node.x}, ${node.y})`);
 
             const regulated = isRegulated(node.node_id);
+            const { regulated: regulatedGenesList, nonRegulated: nonRegulatedGenesList } = getRegulatedGenesInNode(node.node_id);
 
             if (node.type === 'compound') {
                 // Compounds as circles with gradient (PhytoLearning emerald style)
-                g.append('circle')
+                const circle = g.append('circle')
                     .attr('r', 12)
                     .attr('fill', 'url(#compound-gradient)')
                     .attr('stroke', '#065f46')
                     .attr('stroke-width', 2)
-                    .style('filter', regulated ? 'url(#glow)' : 'none');
+                    .style('filter', regulated ? 'url(#glow)' : 'none')
+                    .style('cursor', 'pointer');
+
+                // Hover effect for compounds
+                circle.on('mouseenter', function() {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr('r', 14)
+                        .attr('stroke-width', 3)
+                        .style('filter', 'url(#glow)');
+                }).on('mouseleave', function() {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr('r', 12)
+                        .attr('stroke-width', 2)
+                        .style('filter', regulated ? 'url(#glow)' : 'none');
+                });
             } else {
                 // Genes as rounded rectangles
                 const rectWidth = node.width || 46;
                 const rectHeight = node.height || 17;
 
                 // Background glow for regulated genes
-                if (regulated) {
-                    g.append('rect')
-                        .attr('x', -rectWidth / 2 - 2)
-                        .attr('y', -rectHeight / 2 - 2)
-                        .attr('width', rectWidth + 4)
-                        .attr('height', rectHeight + 4)
-                        .attr('rx', 6)
-                        .attr('fill', '#10b981')
-                        .attr('opacity', 0.3);
-                }
+                const glowRect = regulated ? g.append('rect')
+                    .attr('x', -rectWidth / 2 - 2)
+                    .attr('y', -rectHeight / 2 - 2)
+                    .attr('width', rectWidth + 4)
+                    .attr('height', rectHeight + 4)
+                    .attr('rx', 6)
+                    .attr('fill', '#10b981')
+                    .attr('opacity', 0.3) : null;
 
-                g.append('rect')
+                const mainRect = g.append('rect')
                     .attr('x', -rectWidth / 2)
                     .attr('y', -rectHeight / 2)
                     .attr('width', rectWidth)
@@ -186,31 +235,108 @@ export default function PathwayVisualization({ pathwayData, regulatoryData }: Pa
                     .attr('fill', regulated ? '#064e3b' : '#1e293b')
                     .attr('stroke', regulated ? '#10b981' : '#475569')
                     .attr('stroke-width', regulated ? 2 : 1.5)
-                    .style('filter', regulated ? 'url(#glow)' : 'none');
+                    .style('filter', regulated ? 'url(#glow)' : 'none')
+                    .style('cursor', 'pointer');
 
                 // Gene label
-                if (showLabels) {
-                    g.append('text')
-                        .text(node.display_name)
-                        .attr('text-anchor', 'middle')
-                        .attr('dominant-baseline', 'middle')
-                        .attr('fill', regulated ? '#d1fae5' : '#e2e8f0')
-                        .attr('font-size', '9px')
-                        .attr('font-weight', regulated ? '700' : '600')
-                        .attr('font-family', 'Inter, system-ui, sans-serif');
-                }
+                const label = showLabels ? g.append('text')
+                    .text(node.display_name)
+                    .attr('text-anchor', 'middle')
+                    .attr('dominant-baseline', 'middle')
+                    .attr('fill', regulated ? '#d1fae5' : '#e2e8f0')
+                    .attr('font-size', '9px')
+                    .attr('font-weight', regulated ? '700' : '600')
+                    .attr('font-family', 'Inter, system-ui, sans-serif')
+                    .style('pointer-events', 'none') : null;
+
+                // Hover effect for genes
+                mainRect.on('mouseenter', function() {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr('stroke', '#10b981')
+                        .attr('stroke-width', 3)
+                        .style('filter', 'url(#glow)');
+
+                    if (glowRect) {
+                        glowRect.transition().duration(200).attr('opacity', 0.6);
+                    }
+
+                    if (label) {
+                        label.transition().duration(200).attr('fill', '#d1fae5').attr('font-weight', '700');
+                    }
+                }).on('mouseleave', function() {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr('stroke', regulated ? '#10b981' : '#475569')
+                        .attr('stroke-width', regulated ? 2 : 1.5)
+                        .style('filter', regulated ? 'url(#glow)' : 'none');
+
+                    if (glowRect) {
+                        glowRect.transition().duration(200).attr('opacity', 0.3);
+                    }
+
+                    if (label) {
+                        label.transition().duration(200)
+                            .attr('fill', regulated ? '#d1fae5' : '#e2e8f0')
+                            .attr('font-weight', regulated ? '700' : '600');
+                    }
+                });
             }
 
-            // Tooltip on hover
+            // Enhanced tooltip with regulated genes highlighted and symbols
             g.append('title')
                 .text(() => {
-                    const genes = (nodeContentById.get(node.node_id) || [])
-                        .join(', ');
-                    return `${node.display_name}\n${genes}${regulated ? '\n✓ Has regulatory data' : ''}`;
+                    let tooltip = `${node.display_name}\n\n`;
+
+                    // Helper function to format gene with symbol
+                    const formatGene = (geneId: string): string => {
+                        const symbol = geneMapping[geneId.toUpperCase()];
+                        return symbol ? `${geneId} (${symbol})` : geneId;
+                    };
+
+                    if (regulatedGenesList.length > 0) {
+                        tooltip += `✅ REGULATED GENES (${regulatedGenesList.length}):\n`;
+                        tooltip += regulatedGenesList.map(formatGene).join('\n') + '\n';
+                    }
+
+                    if (nonRegulatedGenesList.length > 0) {
+                        tooltip += `\n⚪ Other genes (${nonRegulatedGenesList.length}):\n`;
+                        tooltip += nonRegulatedGenesList.map(formatGene).join('\n');
+                    }
+
+                    if (regulatedGenesList.length === 0 && nonRegulatedGenesList.length === 0) {
+                        tooltip += '(No genes mapped)';
+                    }
+
+                    return tooltip;
                 });
         });
 
-    }, [pathwayData, regulatedGenes, showLabels, highlightRegulated, nodeContentById]);
+    }, [pathwayData, regulatedGenes, showLabels, highlightRegulated, nodeContentById, geneMapping]);
+
+    // Zoom control functions
+    const handleZoomIn = () => {
+        if (zoomRef.current) {
+            const { svg, zoom } = zoomRef.current;
+            svg.transition().duration(300).call(zoom.scaleBy, 1.3);
+        }
+    };
+
+    const handleZoomOut = () => {
+        if (zoomRef.current) {
+            const { svg, zoom } = zoomRef.current;
+            svg.transition().duration(300).call(zoom.scaleBy, 0.7);
+        }
+    };
+
+    const handleZoomReset = () => {
+        if (zoomRef.current) {
+            const { svg, zoom } = zoomRef.current;
+            svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+        }
+    };
 
     return (
         <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl shadow-2xl border border-slate-700 flex flex-col overflow-hidden h-[800px] relative">
@@ -229,6 +355,31 @@ export default function PathwayVisualization({ pathwayData, regulatoryData }: Pa
                 </div>
 
                 <div className="flex items-center gap-3">
+                    {/* Zoom Controls */}
+                    <div className="flex items-center gap-1 bg-slate-800/50 rounded-xl p-1 border border-slate-700">
+                        <button
+                            onClick={handleZoomIn}
+                            className="px-3 py-2 rounded-lg text-xs font-bold text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+                            title="Zoom In (scroll up)"
+                        >
+                            🔍+
+                        </button>
+                        <button
+                            onClick={handleZoomOut}
+                            className="px-3 py-2 rounded-lg text-xs font-bold text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+                            title="Zoom Out (scroll down)"
+                        >
+                            🔍−
+                        </button>
+                        <button
+                            onClick={handleZoomReset}
+                            className="px-3 py-2 rounded-lg text-xs font-bold text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+                            title="Reset Zoom"
+                        >
+                            ↺
+                        </button>
+                    </div>
+
                     <button
                         onClick={() => setHighlightRegulated(!highlightRegulated)}
                         className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${highlightRegulated
@@ -253,8 +404,18 @@ export default function PathwayVisualization({ pathwayData, regulatoryData }: Pa
             {/* SVG Canvas */}
             <div className="flex-1 relative bg-slate-950/50 overflow-hidden">
                 {/* Legend */}
-                <div className="absolute top-6 left-6 p-5 bg-slate-900/80 backdrop-blur-md border border-slate-700 rounded-2xl z-10 space-y-4 shadow-2xl">
+                <div className="absolute top-6 left-6 p-5 bg-slate-900/80 backdrop-blur-md border border-slate-700 rounded-2xl z-10 space-y-4 shadow-2xl max-w-xs">
                     <div className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-3">Legend</div>
+
+                    {/* Controls Info */}
+                    <div className="pb-3 border-b border-slate-700">
+                        <div className="text-[10px] font-bold uppercase text-slate-400 mb-2">Controls</div>
+                        <div className="space-y-1 text-[10px] text-slate-300">
+                            <div>🖱️ Scroll: Zoom in/out</div>
+                            <div>🖱️ Drag: Pan/Move</div>
+                            <div>🔍 Hover: See genes</div>
+                        </div>
+                    </div>
                     <div className="space-y-2.5">
                         <div className="flex items-center gap-3">
                             <div className="w-5 h-3 bg-slate-800 border-2 border-slate-600 rounded"></div>

@@ -43,6 +43,7 @@ const App: React.FC = () => {
   const [selectedSources, setSelectedSources] = useState<string[]>(['TARGET', 'DAP', 'CHIP']);
   const [graphScope, setGraphScope] = useState<'global' | 'direct' | 'cascade'>('global');
   const [pathwayData, setPathwayData] = useState<PathwayData | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const PRIORITY_GO_TERMS = [
     { id: 'all', label: 'Todos los Procesos' },
@@ -185,14 +186,19 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 overflow-hidden">
-      <aside className="w-72 bg-slate-900/50 backdrop-blur-xl border-r border-slate-800 text-slate-300 flex flex-col shrink-0 shadow-2xl">
-        <div className="p-6 border-b border-slate-800 flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-500/30">
-            🌱
+      {/* Mobile overlay */}
+      <div className={`fixed inset-0 bg-slate-950/70 z-20 transition-opacity md:hidden ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)}></div>
+      <aside className={`fixed md:static z-30 w-72 h-full bg-slate-900/50 backdrop-blur-xl border-r border-slate-800 text-slate-300 flex flex-col shrink-0 shadow-2xl transition-transform md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="p-6 border-b border-slate-800 flex items-center gap-3 justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-500/30">
+              🌱
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-white tracking-tight leading-tight">Plant Regulatory<br />Network Tool</h1>
+            </div>
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-white tracking-tight leading-tight">Plant Regulatory<br />Network Tool</h1>
-          </div>
+          <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-slate-400 hover:text-white">✕</button>
         </div>
 
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
@@ -235,32 +241,35 @@ const App: React.FC = () => {
       </aside>
 
       <main className="flex-1 flex flex-col min-w-0 bg-slate-950/30">
-        <header className="h-20 bg-slate-900/50 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between px-8 shrink-0 z-10 shadow-lg">
-          <div className="flex flex-col gap-1 items-start">
-            <div className="flex items-center gap-4">
-              <h2 className="text-lg font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">Regulatory Dashboard</h2>
-              <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-1.5 shadow-sm backdrop-blur-sm">
-                <span className="text-[10px] font-black text-emerald-400 uppercase">GO Context:</span>
-                <select value={selectedGoTerm} onChange={(e) => setSelectedGoTerm(e.target.value)} className="bg-transparent text-xs font-bold text-teal-400 outline-none cursor-pointer max-w-[250px]">
-                  {PRIORITY_GO_TERMS.map(p => <option key={p.id} value={p.id} className="bg-slate-800">{p.label}</option>)}
-                </select>
+        <header className="h-20 bg-slate-900/50 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between px-4 md:px-8 shrink-0 z-10 shadow-lg">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setIsSidebarOpen(true)} className="md:hidden px-3 py-2 rounded-lg bg-slate-800/60 border border-slate-700 text-slate-200">☰</button>
+            <div className="flex flex-col gap-1 items-start">
+              <div className="flex items-center gap-4">
+                <h2 className="text-lg font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">Regulatory Dashboard</h2>
+                <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-1.5 shadow-sm backdrop-blur-sm">
+                  <span className="text-[10px] font-black text-emerald-400 uppercase">GO Context:</span>
+                  <select value={selectedGoTerm} onChange={(e) => setSelectedGoTerm(e.target.value)} className="bg-transparent text-xs font-bold text-teal-400 outline-none cursor-pointer max-w-[250px]">
+                    {PRIORITY_GO_TERMS.map(p => <option key={p.id} value={p.id} className="bg-slate-800">{p.label}</option>)}
+                  </select>
+                </div>
               </div>
-            </div>
 
-            <div className="flex gap-2">
-              {PRIORITY_TFS.map(tf => (
-                <button
-                  key={tf}
-                  onClick={() => {
-                    const newVal = priorityTfFilter === tf ? null : tf;
-                    setPriorityTfFilter(newVal);
-                    if (newVal) setGraphScope('direct');
-                  }}
-                  className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-all ${priorityTfFilter === tf ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/30' : 'bg-slate-800 text-slate-400 border-slate-700 hover:border-emerald-500/50'}`}
-                >
-                  {tf}
-                </button>
-              ))}
+              <div className="flex gap-2">
+                {PRIORITY_TFS.map(tf => (
+                  <button
+                    key={tf}
+                    onClick={() => {
+                      const newVal = priorityTfFilter === tf ? null : tf;
+                      setPriorityTfFilter(newVal);
+                      if (newVal) setGraphScope('direct');
+                    }}
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-all ${priorityTfFilter === tf ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/30' : 'bg-slate-800 text-slate-400 border-slate-700 hover:border-emerald-500/50'}`}
+                  >
+                    {tf}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -273,13 +282,11 @@ const App: React.FC = () => {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" /></svg>
               TSV
             </button>
-            <button onClick={handleAiAnalysis} disabled={filteredData.length === 0 || isAnalyzing} className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl text-xs font-black hover:shadow-lg hover:shadow-emerald-500/30 disabled:opacity-50 transition-all uppercase tracking-widest">
-              {isAnalyzing ? 'Analyzing...' : 'Gemini AI'}
-            </button>
+            <button onClick={handleAiAnalysis} disabled={filteredData.length === 0 || isAnalyzing} className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl text-xs font-black hover:shadow-lg hover:shadow-emerald-500/30 disabled:opacity-50 transition-all uppercase tracking-widest">{isAnalyzing ? 'Analyzing...' : 'Gemini AI'}</button>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-8">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8">
           {errorMessage && <div className="mb-6 p-4 bg-red-900/20 text-red-400 text-sm font-bold rounded-2xl border border-red-800 flex justify-between items-center backdrop-blur-sm"><span>{errorMessage}</span><button onClick={() => setErrorMessage(null)} className="text-red-400 hover:text-red-300">✕</button></div>}
 
           {activeView === 'explorer' ? (

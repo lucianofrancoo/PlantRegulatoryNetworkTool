@@ -24,6 +24,7 @@ const App: React.FC = () => {
   const [pathwayMapping, setPathwayMapping] = useState<PathwayMapping>({});
   const [goAnnotations, setGoAnnotations] = useState<Record<string, string[]>>({});
   const [hubMapping, setHubMapping] = useState<HubMapping>({});
+  const [geneMapping, setGeneMapping] = useState<Record<string, string>>({});
 
   const [loading, setLoading] = useState(true);
   const [loadingMsg, setLoadingMsg] = useState("Initializing GeneReg Integrator...");
@@ -64,6 +65,7 @@ const App: React.FC = () => {
         setData(result.interactions);
         setPathwayMapping(result.pathwayMapping);
         setGoAnnotations(result.goAnnotations || {});
+        setGeneMapping(result.geneMapping || {});
         // If hub mapping was loaded, we would set it here. For now empty.
         setHubMapping({});
       } catch (e) {
@@ -357,6 +359,7 @@ const App: React.FC = () => {
               data={filteredData}
               pathwayMapping={pathwayMapping}
               pathwayData={pathwayData}
+              geneMapping={geneMapping}
             />
           ) : activeView === 'enrichment' ? (
             <EnrichmentPanel

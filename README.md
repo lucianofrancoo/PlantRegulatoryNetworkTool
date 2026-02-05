@@ -77,3 +77,60 @@ Data files are served statically from `public/data/` and ingested by the `DataSe
 ---
 
 *Plant Regulatory Network Tool is designed for rapid hypothesis generation in plant systems biology.*
+# Workflow Oficial de Colaboración (Git)
+
+## Flujo con rama `dev` (recomendado)
+**Resumen:** todo se integra primero en `dev`, y solo lo estable pasa a `main`.
+
+### Crear `dev` (una sola vez, por un mantenedor)
+1. `git checkout main`
+2. `git pull origin main`
+3. `git checkout -b dev`
+4. `git push origin dev`
+
+### Trabajar en una feature
+1. `git checkout dev`
+2. `git pull origin dev`
+3. `git checkout -b feature/tu-cambio`
+4. Hacer cambios y probar.
+5. `git add -A`
+6. `git commit -m "feat: describe tu cambio"`
+7. `git push origin feature/tu-cambio`
+8. Abrir PR **hacia `dev`**.
+
+### Integrar a `main`
+1. Crear PR **de `dev` a `main`** cuando el sprint esté estable.
+2. Mergear solo si pasa CI y tiene review.
+
+## Antes de empezar a trabajar
+1. `git checkout main`
+2. `git pull origin main`
+3. `git checkout -b feature/tu-cambio` (o usa tu rama existente)
+
+## Durante el trabajo
+1. Hacer cambios y probar.
+2. `git add -A`
+3. `git commit -m "feat: describe tu cambio"`
+
+## Antes de abrir PR / enviar cambios
+1. `git checkout main`
+2. `git pull origin main`
+3. `git checkout feature/tu-cambio`
+4. `git merge main`  
+   - Alternativa con historial limpio: `git rebase main`
+5. Resolver conflictos si aparecen y volver a hacer commit.
+
+## Publicar la rama
+1. `git push origin feature/tu-cambio`
+
+## Reglas rápidas
+- No subir `node_modules` ni `dist` (ya están en `.gitignore`).
+- Siempre actualizar `main` antes de trabajar.
+- PR obligatorio para `main` y `dev`.
+
+## Reglas formales (GitHub)
+- **Protección de ramas:** bloquear pushes directos a `main` y `dev`.
+- **Reviews:** mínimo 1 aprobación por PR (2 si es cambio grande).
+- **CI obligatorio:** `npm install` + `npm run build` en PRs.
+- **Checks requeridos:** no permitir merge si falla CI.
+- **Dependabot/Renovate:** actualizaciones automáticas de dependencias.

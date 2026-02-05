@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { PieChart, Pie, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { IntegratedInteraction } from '../types';
 
 interface StatsPanelProps {
@@ -8,13 +8,13 @@ interface StatsPanelProps {
 }
 
 const StatsPanel: React.FC<StatsPanelProps> = ({ data }) => {
-  const evidenceCounts = [
-    { name: '1 Source', count: data.filter(i => i.evidenceCount === 1).length },
-    { name: '2 Sources', count: data.filter(i => i.evidenceCount === 2).length },
-    { name: '3 Sources', count: data.filter(i => i.evidenceCount === 3).length },
+  const sourceCounts = [
+    { name: 'TARGET', count: data.filter(i => i.sources.includes('TARGET')).length },
+    { name: 'DAP', count: data.filter(i => i.sources.includes('DAP')).length },
+    { name: 'CHIP', count: data.filter(i => i.sources.includes('CHIP')).length },
   ];
 
-  const COLORS = ['#64748b', '#10b981', '#059669'];
+  const COLORS = ['#10b981', '#3b82f6', '#8b5cf6'];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -22,10 +22,7 @@ const StatsPanel: React.FC<StatsPanelProps> = ({ data }) => {
         <h3 className="text-lg font-bold mb-4 text-emerald-400">Evidence Distribution</h3>
         <div className="h-64 min-h-64 min-w-0 w-full" style={{ minHeight: 256 }}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={evidenceCounts}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" />
-              <XAxis dataKey="name" stroke="#94a3b8" style={{ fontSize: '12px', fontWeight: 600 }} />
-              <YAxis stroke="#94a3b8" style={{ fontSize: '12px', fontWeight: 600 }} />
+            <PieChart>
               <Tooltip
                 cursor={{ fill: '#1e293b' }}
                 contentStyle={{
@@ -36,12 +33,12 @@ const StatsPanel: React.FC<StatsPanelProps> = ({ data }) => {
                   fontWeight: 600
                 }}
               />
-              <Bar dataKey="count" radius={[8, 8, 0, 0]}>
-                {evidenceCounts.map((entry, index) => (
+              <Pie data={sourceCounts} dataKey="count" nameKey="name" innerRadius={50} outerRadius={90} paddingAngle={2}>
+                {sourceCounts.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
-              </Bar>
-            </BarChart>
+              </Pie>
+            </PieChart>
           </ResponsiveContainer>
         </div>
       </div>

@@ -1,53 +1,53 @@
-from	to	type	regulation	subtype
-110	49	PPrel	repression	inhibition,ubiquitination
-126	auxin_PROC_PLANT_GROWTH	GErel	other	
-127	auxin_PROC_PLANT_GROWTH	GErel	other	
-128	auxin_PROC_PLANT_GROWTH	GErel	other	
-136	110	PPrel	activation	activation
-14	136	PPrel	other	compound
-14	181	PPrel	other	compound
-180	183	PPrel	activation	activation,phosphorylation
-180	186	PPrel	activation	activation,phosphorylation
-180	187	PPrel	repression	inhibition,phosphorylation
-180	49	PPrel	activation	activation,phosphorylation
-181	180	PPrel	activation	activation
-183	185	PPrel	other	
-186	197	PPrel	activation	activation,phosphorylation
-187	auxin_PROC_AUXIN_BIOSYN	GErel	other	
-49	51	PPrel	repression	inhibition
-51	auxin_DNA_auxin	GErel	other	
-auxin_DNA_auxin	126	GErel	other	
-auxin_DNA_auxin	127	GErel	other	
-auxin_DNA_auxin	128	GErel	other	
-aba_137	aba_DNA_aba	GErel	activation	expression
-aba_16	aba_60	PCrel	other	
-aba_60	62_aba	PPrel	repression	inhibition
-62_aba	aba_67	PPrel	repression	inhibition,dephosphorylation
-aba_67	aba_137	PPrel	activation	activation
-aba_DNA_aba	aba_PROC_STOMATAL_CLOSURE	GErel	activation	expression
-180	62_aba	PPrel	repression	inhibition,phosphorylation
-4016_137	4016_227	PPrel	activation	activation,phosphorylation
-4016_140	4016_137	PPrel	activation	activation
-aba_67	4016_140	PPrel	activation	activation,indirect effect
-4016_171	4016_172	PPrel	activation	activation,phosphorylation
-4016_172	4016_COMP_H2O2	PPrel	activation	activation
-4016_177	4016_COMP_H2O2	PPrel	repression	inhibition
-4016_227	4016_PROC_STRESS_ADAPT	GErel	activation	activation
-aba_16	4016_GENE_UNKNOWN	PPrel	activation	activation
-4016_COMP_H2O2	4016_DNA_aba_mapk	GErel	activation	activation
-4016_COMP_H2O2	4016_PROC_STRESS_TOL	GErel	activation	activation
-4016_DNA_aba_mapk	4016_177	GErel	activation	activation
-4016_GENE_UNKNOWN	4016_171	PPrel	activation	activation
-186	4016_172	PPrel	activation	activation,phosphorylation
-120	88	PPrel	repression	inhibition,ubiquitination
-25	99	PPrel	activation	activation
-27	DNA_jasmonate	GErel	activation	expression
-88	27	PPrel	other	dissociation
-97	120	PCrel	other	
-99	97	PPrel	activation	activation
-DNA_jasmonate	PROC_SENESCENCE	GErel	activation	expression
-27	4016_PROC_ROOT_GROWTH	GErel	activation	activation
-4016_137	4016_172	PPrel	activation	activation,phosphorylation
-4016_172	27	PPrel	repression	inhibition,phosphorylation
-25	jas_4016_GENE_UNKNOWN	PPrel	activation	activation
-jas_4016_GENE_UNKNOWN	4016_137	PPrel	activation	activation,phosphorylation
+from	from_name	from_type	to	to_name	to_type	type	regulation	subtype_1	value_1	subtype_2	value_2	subtype_label	pathway	source
+110	AFB3	gene	49	IAA10	gene	PPrel	repression	inhibition	--|	ubiquitination	+u	inhibition+ubiquitination	auxin	4075
+126	AT1G23160	gene	auxin_PROC_PLANT_GROWTH	Plant Growth	process	GErel	other	NA	NA	NA	NA	NA	auxin	4075
+49	IAA10	gene	auxin_PROC_PLANT_GROWTH	Plant Growth	process	GErel	other	NA	NA	NA	NA	NA	auxin	4075
+128	AT1G16510	gene	auxin_PROC_PLANT_GROWTH	Plant Growth	process	GErel	other	NA	NA	NA	NA	NA	auxin	4075
+136	LAX3	gene	110	AFB3	gene	PPrel	activation	activation	-->	NA	NA	activation	auxin	4075
+14	IAA	compound	136	LAX3	gene	PPrel	other	compound	NA	NA	NA	compound	auxin	4075
+14	IAA	compound	181	ABP1	gene	PPrel	other	compound	NA	NA	NA	compound	auxin	4075
+180	AT1G24650	gene	183	AHA10	gene	PPrel	activation	activation	-->	phosphorylation	+p	activation+phosphorylation	auxin	4075
+180	AT1G24650	gene	186	MKK4	gene	PPrel	activation	activation	-->	phosphorylation	+p	activation+phosphorylation	auxin	4075
+180	AT1G24650	gene	187	TAR1	gene	PPrel	repression	inhibition	--|	phosphorylation	+p	inhibition+phosphorylation	auxin	4075
+180	AT1G24650	gene	49	IAA10	gene	PPrel	activation	activation	-->	phosphorylation	+p	activation+phosphorylation	auxin	4075
+181	ABP1	gene	180	AT1G24650	gene	PPrel	activation	activation	-->	NA	NA	activation	auxin	4075
+183	AHA10	gene	185	H+	compound	PPrel	other	NA	NA	NA	NA	NA	auxin	4075
+186	MKK4	gene	197	MPK6	gene	PPrel	activation	activation	-->	phosphorylation	+p	activation+phosphorylation	auxin	4075
+187	TAR1	gene	auxin_PROC_AUXIN_BIOSYN	Auxin Biosynthesis	process	GErel	other	NA	NA	NA	NA	NA	auxin	4075
+49	IAA10	gene	51	ARF19	gene	PPrel	repression	inhibition	-+-	NA	NA	inhibition	auxin	4075
+51	ARF19	gene	auxin_DNA_auxin	DNA	compound	GErel	other	NA	NA	NA	NA	NA	auxin	4075
+auxin_DNA_auxin	DNA	compound	126	AT1G23160	gene	GErel	other	NA	NA	NA	NA	NA	auxin	4075
+auxin_DNA_auxin	DNA	compound	49	IAA10	gene	GErel	other	NA	NA	NA	NA	NA	auxin	4075
+auxin_DNA_auxin	DNA	compound	128	AT1G16510	gene	GErel	other	NA	NA	NA	NA	NA	auxin	4075
+aba_137	GBF4	gene	aba_DNA_aba	DNA	compound	GErel	activation	expression	-->	NA	NA	expression	aba	4075
+aba_16	ABA	compound	aba_60	RCAR1	gene	PCrel	other	NA	NA	NA	NA		aba	4075
+aba_60	RCAR1	gene	62_aba	HAI2	gene	PPrel	repression	inhibition	--|	NA	NA	inhibition	aba	4075
+62_aba	HAI2	gene	aba_67	SNRK2.4	gene	PPrel	repression	inhibition	--|	dephosphorylation	-p	inhibition+dephosphorylation	aba	4075
+aba_67	SNRK2.4	gene	aba_137	GBF4	gene	PPrel	activation	activation	-->	NA	NA	activation	aba	4075
+aba_DNA_aba	DNA	compound	aba_PROC_STOMATAL_CLOSURE	Stomatal closure/Seed dormancy	process	GErel	activation	expression	-->	NA	NA	expression	aba	4075
+180	AT1G24650	gene	62_aba	HAI2	gene	PPrel	repression	inhibition	--|	phosphorylation	+p	inhibition+phosphorylation	cross	4075
+4016_137	MKK3	gene	4016_227	MPK1	gene	PPrel	activation	activation	-->	phosphorylation	+p	activation+phosphorylation	NA	4016
+4016_140	MAPKKK18	gene	4016_137	MKK3	gene	PPrel	activation	activation	-->	NA	NA	activation	NA	4016
+aba_67	SNRK2.4	gene	4016_140	MAPKKK18	gene	PPrel	activation	activation	-->	indirect effect	..>	activation+indirect effect	NA	4016
+4016_171	MEK1	gene	4016_172	MPK6	gene	PPrel	activation	activation	-->	phosphorylation	+p	activation+phosphorylation	NA	4016
+4016_172	MPK6	gene	4016_COMP_H2O2	H2O2	compound	PPrel	activation	activation	-->	NA	NA	activation	NA	4016
+4016_177	CAT3	gene	4016_COMP_H2O2	H2O2	compound	PPrel	repression	inhibition	--|	NA	NA	inhibition	NA	4016
+4016_227	MPK1	gene	4016_PROC_STRESS_ADAPT	Stress adaptation	process	GErel	activation	activation	-->	NA	NA	activation	NA	4016
+aba_16	ABA	compound	4016_GENE_UNKNOWN	?	gene	PPrel	activation	activation	-->	NA	NA	activation	NA	4016
+4016_COMP_H2O2	H2O2	compound	4016_DNA_aba_mapk	DNA	compound	GErel	activation	activation	-->	NA	NA	activation	NA	4016
+4016_COMP_H2O2	H2O2	compound	4016_PROC_STRESS_TOL	Stress-tolerant response	process	GErel	activation	activation	-->	NA	NA	activation	NA	4016
+4016_DNA_aba_mapk	DNA	compound	4016_177	CAT3	gene	GErel	activation	activation	-->	NA	NA	activation	NA	4016
+4016_GENE_UNKNOWN	?	gene	4016_171	MEK1	gene	PPrel	activation	activation	-->	NA	NA	activation	NA	4016
+186	MKK4	gene	4016_172	MPK6	gene	PPrel	activation	activation	-->	phosphorylation	+p	activation+phosphorylation	NA	cross
+120	COI1	gene	88	JAZ5	gene	PPrel	repression	inhibition	--|	ubiquitination	+u	inhibition+ubiquitination	4075	NA
+25	Jasmonate	compound	99	JAR1	gene	PPrel	activation	activation	-->	NA	NA	activation	4075	NA
+27	MYC2	gene	DNA_jasmonate	DNA	compound	GErel	activation	expression	-->	NA	NA	expression	4075	NA
+88	JAZ5	gene	27	MYC2	gene	PPrel	other	dissociation	-+-	NA	NA	dissociation	4075	NA
+97	(-)-JA-L-Ile	compound	120	COI1	gene	PCrel	other	NA	NA	NA	NA		4075	NA
+99	JAR1	gene	97	(-)-JA-L-Ile	compound	PPrel	activation	activation	-->	NA	NA	activation	4075	NA
+DNA_jasmonate	DNA	compound	PROC_SENESCENCE	Senescence/Stress response	process	GErel	activation	expression	-->	NA	NA	expression	4075	NA
+27	MYC2	gene	4016_PROC_ROOT_GROWTH	Root growth	process	GErel	activation	activation	-->	NA	NA	activation	4016	NA
+4016_137	MKK3	gene	4016_172	MPK6	gene	PPrel	activation	activation	-->	phosphorylation	+p	activation+phosphorylation	4016	NA
+4016_172	MPK6	gene	27	MYC2	gene	PPrel	repression	inhibition	--|	phosphorylation	+p	inhibition+phosphorylation	4016	NA
+25	Jasmonate	compound	jas_4016_GENE_UNKNOWN	?	gene	PPrel	activation	activation	-->	NA	NA	activation	4016	NA
+jas_4016_GENE_UNKNOWN	?	gene	4016_137	MKK3	gene	PPrel	activation	activation	-->	phosphorylation	+p	activation+phosphorylation	4016	NA

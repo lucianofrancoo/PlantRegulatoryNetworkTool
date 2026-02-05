@@ -110,8 +110,8 @@ export async function loadPathway(pathwayId: string): Promise<PathwayData | null
         const nodeContent = parseTSV<PathwayNodeContent>(contentText, (row) => ({
             node_id: row.node_id,
             display_name: row.display_name,
-            type: row.type,
-            gene_or_compound_id: row.gene_or_compound_id,
+            type: row.type || 'gene',
+            gene_or_compound_id: row.gene_or_compound_id || row.gene_id || row.symbol || '',
             x: parseFloat(row.x || '0'),
             y: parseFloat(row.y || '0')
         }));

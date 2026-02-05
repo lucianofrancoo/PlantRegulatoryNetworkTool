@@ -1,47 +1,46 @@
-node_id	display_name	type	pathway_role	x	y	width	height
-181	ABP1	gene	auxin	295	456	46	17
-110	AFB3	gene	auxin	544	306	46	17
-183	AHA10	gene	auxin	394	756	46	17
-51	ARF19	gene	auxin	844	306	46	17
-128	AT1G16510	gene	auxin	1144	381	46	17
-126	AT1G23160	gene	auxin	1144	306	46	17
-180	AT1G24650	gene	auxin	394	606	46	17
-auxin_DNA_auxin	DNA	compound	auxin	994	306	8	8
-185	H+	compound	auxin	244	756	8	8
-14	IAA	compound	auxin	244	306	8	8
-49	IAA10	gene	auxin	694	306	46	17
-127	IAA10	gene	auxin	1144	231	46	17
-136	LAX3	gene	auxin	394	306	46	17
-186	MKK4	gene	auxin	544	606	46	17
-197	MPK3	gene	auxin	694	606	46	17
-187	TAR1	gene	auxin	544	456	46	17
-auxin_PROC_AUXIN_BIOSYN	Auxin Biosynthesis	process	auxin	1294	456	70	18
-auxin_PROC_PLANT_GROWTH	Plant Growth	process	auxin	1294	306	60	18
-aba_16	ABA	compound	aba	244	906	8	8
-aba_DNA_aba	DNA	compound	aba	994	906	8	8
-aba_137	GBF4	gene	aba	844	906	46	17
-62_aba	HAI2	gene	aba	544	906	46	17
-aba_60	RCAR1	gene	aba	394	906	46	17
-aba_67	SNRK2.4	gene	aba	694	906	46	17
-aba_PROC_STOMATAL_CLOSURE	Stomatal closure/Seed dormancy	process	aba	1294	906	100	18
-4016_177	CAT3	gene	aba_4016	1144	756	46	17
-4016_140	MAPKKK18	gene	aba_4016	694	1056	46	17
-4016_171	MEK1	gene	aba_4016	694	756	46	17
-4016_137	MKK3	gene	aba_4016	844	1056	46	17
-4016_227	MPK1	gene	aba_4016	994	1056	46	17
-4016_172	MPK6	gene	aba_4016	844	681	46	17
-4016_GENE_UNKNOWN	?	gene	aba_4016	544	756	46	17
-4016_DNA_aba_mapk	DNA	compound	aba_4016	994	756	8	8
-4016_COMP_H2O2	H2O2	compound	aba_4016	994	681	8	8
-4016_PROC_STRESS_ADAPT	Stress adaptation	process	aba_4016	1294	1056	100	18
-4016_PROC_STRESS_TOL	Stress-tolerant response	process	aba_4016	1294	681	110	18
-97	(-)-JA-L-Ile	compound	4075	544	1206	8	8
-120	COI1	gene	4075	694	1206	46	17
-DNA_jasmonate	DNA	compound	4075	1144	1206	8	8
-99	JAR1	gene	4075	394	1206	46	17
-88	JAZ5	gene	4075	844	1206	46	17
-25	Jasmonate	compound	4075	244	1131	8	8
-27	MYC2	gene	4075	994	1206	46	17
-PROC_SENESCENCE	Senescence/Stress response	process	4075	1294	1206	100	18
-jas_4016_GENE_UNKNOWN	?	gene	4016	694	1131	46	17
-4016_PROC_ROOT_GROWTH	Root growth	process	4016	1294	1131	100	18
+node_id	display_name	type	shape	n_elements	x	y	width	height	fgcolor	bgcolor	pathway	source
+181	ABP1	gene	rectangle	1	295	456	46	17	#000000	#BFFFBF	auxin	4075
+110	AFB3	gene	rectangle	4	544	306	46	17	#000000	#BFFFBF	auxin	4075
+183	AHA10	gene	rectangle	12	394	756	46	17	#000000	#BFFFBF	auxin	4075
+51	ARF19	gene	rectangle	23	844	306	46	17	#000000	#BFFFBF	auxin	4075
+128	AT1G16510	gene	rectangle	70	1144	306	46	17	#000000	#BFFFBF	auxin	4075
+126	AT1G23160	gene	rectangle	18	1144	231	46	17	#000000	#BFFFBF	auxin	4075
+180	AT1G24650	gene	rectangle	4	394	606	46	17	#000000	#BFFFBF	auxin	4075
+auxin_DNA_auxin	DNA	compound	circle	1	994	306	8	8	#000000	#FFFFFF	auxin	4075
+185	H+	compound	circle	1	244	756	8	8	#000000	#FFFFFF	auxin	4075
+14	IAA	compound	circle	1	244	306	8	8	#000000	#FFFFFF	auxin	4075
+49	IAA10	gene	rectangle	28	694	306	46	17	#000000	#BFFFBF	auxin	4075
+136	LAX3	gene	rectangle	4	394	306	46	17	#000000	#BFFFBF	auxin	4075
+186	MKK4	gene	rectangle	2	544	606	46	17	#000000	#BFFFBF	auxin	4075
+197	MPK3	gene	rectangle	1	694	606	46	17	#000000	#BFFFBF	auxin	4075
+187	TAR1	gene	rectangle	3	544	456	46	17	#000000	#BFFFBF	auxin	4075
+auxin_PROC_AUXIN_BIOSYN	Auxin Biosynthesis	process	rectangle	1	1294	456	70	18	#000000	#D9D9D9	auxin	4075
+auxin_PROC_PLANT_GROWTH	Plant Growth	process	rectangle	1	1294	306	60	18	#000000	#D9D9D9	auxin	4075
+aba_16	ABA	compound	circle	1	244	906	8	8	#000000	#FFFFFF	aba	4075
+aba_DNA_aba	DNA	compound	circle	1	994	906	8	8	#000000	#FFFFFF	aba	4075
+aba_137	GBF4	gene	rectangle	13	844	906	46	17	#000000	#BFFFBF	aba	4075
+62_aba	HAI2	gene	rectangle	9	544	906	46	17	#000000	#BFFFBF	aba	4075
+aba_60	RCAR1	gene	rectangle	14	394	906	46	17	#000000	#BFFFBF	aba	4075
+aba_67	SNRK2.4	gene	rectangle	10	694	906	46	17	#000000	#BFFFBF	aba	4075
+aba_PROC_STOMATAL_CLOSURE	Stomatal closure/Seed dormancy	process	rectangle	1	1294	906	100	18	#000000	#D9D9D9	aba	4075
+4016_177	CAT3	gene	rectangle	3	1144	756	46	17	#000000	#BFFFBF	aba_4016	4016
+4016_140	MAPKKK18	gene	rectangle	2	694	1056	46	17	#000000	#BFFFBF	aba_4016	4016
+4016_171	MEK1	gene	rectangle	1	694	756	46	17	#000000	#BFFFBF	aba_4016	4016
+4016_137	MKK3	gene	rectangle	1	844	1056	46	17	#000000	#BFFFBF	aba_4016	4016
+4016_227	MPK1	gene	rectangle	4	994	1056	46	17	#000000	#BFFFBF	aba_4016	4016
+4016_172	MPK6	gene	rectangle	2	844	681	46	17	#000000	#BFFFBF	aba_4016	4016
+4016_GENE_UNKNOWN	?	gene	rectangle	1	544	756	46	17	#000000	#87CEEB	aba_4016	4016
+4016_DNA_aba_mapk	DNA	compound	circle	1	994	756	8	8	#000000	#FFFFFF	aba_4016	4016
+4016_COMP_H2O2	H2O2	compound	circle	1	994	681	8	8	#000000	#FFFFFF	aba_4016	4016
+4016_PROC_STRESS_ADAPT	Stress adaptation	process	rectangle	1	1294	1056	100	18	#000000	#D9D9D9	aba_4016	4016
+4016_PROC_STRESS_TOL	Stress-tolerant response	process	rectangle	1	1294	681	110	18	#000000	#D9D9D9	aba_4016	4016
+97	(-)-JA-L-Ile	compound	circle	1	544	1206	8	8	#000000	#FFFFFF	4075	NA
+120	COI1	gene	rectangle	1	694	1206	46	17	#000000	#BFFFBF	4075	NA
+DNA_jasmonate	DNA	compound	circle	1	1144	1206	8	8	#000000	#FFFFFF	4075	NA
+99	JAR1	gene	rectangle	1	394	1206	46	17	#000000	#BFFFBF	4075	NA
+88	JAZ5	gene	rectangle	10	844	1206	46	17	#000000	#BFFFBF	4075	NA
+25	Jasmonate	compound	circle	1	244	1131	8	8	#000000	#FFFFFF	4075	NA
+27	MYC2	gene	rectangle	1	994	1206	46	17	#000000	#BFFFBF	4075	NA
+PROC_SENESCENCE	Senescence/Stress response	process	rectangle	1	1294	1206	100	18	#000000	#D9D9D9	4075	NA
+jas_4016_GENE_UNKNOWN	?	gene	rectangle	1	694	1131	46	17	#000000	#87CEEB	4016	NA
+4016_PROC_ROOT_GROWTH	Root growth	process	rectangle	1	1294	1131	100	18	#000000	#D9D9D9	4016	NA

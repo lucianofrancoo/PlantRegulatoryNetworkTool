@@ -274,10 +274,10 @@ export default function PathwayVisualization({ pathwayData, regulatoryData, gene
             if (node.type === 'compound') {
                 // Compounds as circles with neutral gray gradient
                 const circle = g.append('circle')
-                    .attr('r', 12)
+                    .attr('r', 18)  // Increased from 12
                     .attr('fill', 'url(#compound-gradient)')
                     .attr('stroke', '#334155')
-                    .attr('stroke-width', 2)
+                    .attr('stroke-width', 2.5) // Increased from 2
                     .style('cursor', 'pointer');
 
                 // Hover effect for compounds
@@ -285,15 +285,15 @@ export default function PathwayVisualization({ pathwayData, regulatoryData, gene
                     d3.select(this)
                         .transition()
                         .duration(200)
-                        .attr('r', 14)
-                        .attr('stroke-width', 3)
+                        .attr('r', 22) // Increased from 14
+                        .attr('stroke-width', 4) // Increased
                         .style('filter', 'url(#glow)');
                 }).on('mouseleave', function () {
                     d3.select(this)
                         .transition()
                         .duration(200)
-                        .attr('r', 12)
-                        .attr('stroke-width', 2)
+                        .attr('r', 18) // Back to 18
+                        .attr('stroke-width', 2.5)
                         .style('filter', 'none');
                 });
 
@@ -302,20 +302,21 @@ export default function PathwayVisualization({ pathwayData, regulatoryData, gene
                     g.append('text')
                         .text(node.display_name)
                         .attr('text-anchor', 'middle')
-                        .attr('y', -18) // Position above the circle
-                        .attr('fill', '#e2e8f0') // Light slate color for contrast
-                        .attr('font-size', '11px')
+                        .attr('y', -24) // Adjusted position from -18
+                        .attr('fill', '#e2e8f0')
+                        .attr('font-size', '14px') // Increased from 11px
                         .attr('font-weight', '700')
                         .attr('font-family', 'Inter, system-ui, sans-serif')
-                        .attr('stroke', '#0f172a') // Dark outline for better readability
-                        .attr('stroke-width', '0.3px')
+                        .attr('stroke', '#0f172a')
+                        .attr('stroke-width', '0.4px') // Increased slightly
                         .attr('paint-order', 'stroke')
                         .style('pointer-events', 'none');
                 }
             } else {
                 // Genes as rounded rectangles
-                const rectWidth = node.width || 46;
-                const rectHeight = node.height || 17;
+                const scale = 1.3; // Scale factor for genes
+                const rectWidth = (node.width || 46) * scale;
+                const rectHeight = (node.height || 17) * scale;
 
                 // Background glow for regulated genes
                 const glowRect = regulated ? g.append('rect')
@@ -323,7 +324,7 @@ export default function PathwayVisualization({ pathwayData, regulatoryData, gene
                     .attr('y', -rectHeight / 2 - 2)
                     .attr('width', rectWidth + 4)
                     .attr('height', rectHeight + 4)
-                    .attr('rx', 6)
+                    .attr('rx', 6) // Increased from 4
                     .attr('fill', '#10b981')
                     .attr('opacity', 0.3) : null;
 
@@ -332,7 +333,7 @@ export default function PathwayVisualization({ pathwayData, regulatoryData, gene
                     .attr('y', -rectHeight / 2)
                     .attr('width', rectWidth)
                     .attr('height', rectHeight)
-                    .attr('rx', 4)
+                    .attr('rx', 6) // Increased from 4
                     .attr('fill', regulated ? '#064e3b' : '#1e293b')
                     .attr('stroke', regulated ? '#10b981' : '#475569')
                     .attr('stroke-width', regulated ? 2 : 1.5)
@@ -345,8 +346,8 @@ export default function PathwayVisualization({ pathwayData, regulatoryData, gene
                     .attr('text-anchor', 'middle')
                     .attr('dominant-baseline', 'middle')
                     .attr('fill', regulated ? '#d1fae5' : '#e2e8f0')
-                    .attr('font-size', '9px')
-                    .attr('font-weight', regulated ? '700' : '600')
+                    .attr('font-size', '12px') // Increased from 9px
+                    .attr('font-weight', '700') // Default to bold
                     .attr('font-family', 'Inter, system-ui, sans-serif')
                     .style('pointer-events', 'none') : null;
 

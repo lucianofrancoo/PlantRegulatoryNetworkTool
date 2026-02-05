@@ -3,6 +3,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { IntegratedInteraction, AnalysisResult, AppView, PathwayMapping, HubMapping } from './types';
 import StatsPanel from './components/StatsPanel';
 import NetworkVisualization from './components/NetworkVisualization';
+import EnrichmentPanel from './components/EnrichmentPanel';
 import PathwaySelector from './components/PathwaySelector';
 import { analyzeNetwork } from './services/geminiService';
 import { loadIntegratedData } from './services/dataLoader';
@@ -268,6 +269,12 @@ const App: React.FC = () => {
           {activeView === 'explorer' ? (
             <div className="space-y-6 animate-in fade-in duration-500">
               <StatsPanel data={filteredData} />
+              <EnrichmentPanel
+                data={filteredData}
+                selectedSources={selectedSources}
+                minConfidence={minConfidence}
+                goAnnotations={goAnnotations}
+              />
               <div className="bg-slate-900/50 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-800 overflow-hidden">
                 <div className="p-6 border-b border-slate-800 bg-slate-900/30 flex items-center justify-between">
                   <input type="text" placeholder="Search gene, TF or keyword..." className="max-w-xs w-full pl-4 pr-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-2xl text-sm outline-none shadow-sm focus:ring-2 focus:ring-emerald-500 text-slate-200 placeholder-slate-500" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />

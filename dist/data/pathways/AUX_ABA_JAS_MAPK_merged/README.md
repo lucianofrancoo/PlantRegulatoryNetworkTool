@@ -1,4 +1,4 @@
-# Plant Hormone Signaling Pathway (Integrated)
+# AUX+ABA+JASMONATE+MAPK Merged Pathway
 
 ## Source
 This pathway integrates three KEGG pathways related to plant hormone signaling:

@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { IntegratedInteraction, AnalysisResult, AppView, PathwayMapping, HubMapping } from './types';
 import StatsPanel from './components/StatsPanel';
-import NetworkVisualization from './components/NetworkVisualization';
+import NetworkVisualization, { NetworkView } from './components/NetworkVisualization';
 import EnrichmentPanel from './components/EnrichmentPanel';
 import PathwaySelector from './components/PathwaySelector';
 import { analyzeNetwork } from './services/geminiService';
@@ -45,6 +45,7 @@ const App: React.FC = () => {
   const [graphScope, setGraphScope] = useState<'global' | 'direct' | 'cascade'>('global');
   const [pathwayData, setPathwayData] = useState<PathwayData | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [networkView, setNetworkView] = useState<NetworkView>('direct');
 
   const PRIORITY_GO_TERMS = [
     { id: 'all', label: 'Todos los Procesos' },
@@ -236,9 +237,11 @@ const App: React.FC = () => {
             Enrichment
           </button>
 
-          <div className="pt-6 border-t border-slate-800 mt-4">
-            <PathwaySelector onPathwayChange={setPathwayData} />
-          </div>
+          {activeView === 'network' && networkView === 'pathway' && (
+            <div className="pt-6 border-t border-slate-800 mt-4">
+              <PathwaySelector onPathwayChange={setPathwayData} />
+            </div>
+          )}
         </nav>
       </aside>
 
@@ -360,6 +363,7 @@ const App: React.FC = () => {
               pathwayMapping={pathwayMapping}
               pathwayData={pathwayData}
               geneMapping={geneMapping}
+              onViewChange={setNetworkView}
             />
           ) : activeView === 'enrichment' ? (
             <EnrichmentPanel

@@ -13,23 +13,37 @@ export default function DirectTargetsView({ data, pathwayMapping, selectedTF, on
     const svgRef = useRef<SVGSVGElement>(null);
     const [minEvidence, setMinEvidence] = useState(1);
     const [showLabels, setShowLabels] = useState(true);
+    const [selectedSources, setSelectedSources] = useState<string[]>(['TARGET', 'DAP', 'CHIP']);
+    const [sourceFilterMode, setSourceFilterMode] = useState<'OR' | 'AND'>('OR');
 
     // Get unique TFs for selector
     const availableTFs = useMemo(() => {
         return Array.from(new Set(data.map(d => d.tf))).sort();
     }, [data]);
 
-    // Filter targets by selected TF and evidence level
+    // Filter targets by selected TF, evidence level, and sources
     const targets = useMemo(() => {
         return data
-            .filter(d => d.tf === selectedTF && d.evidenceCount >= minEvidence)
+            .filter(d => {
+                const matchesTF = d.tf === selectedTF;
+                const matchesEvidence = d.evidenceCount >= minEvidence;
+
+                let matchesSource = false;
+                if (sourceFilterMode === 'OR') {
+                    matchesSource = d.sources.some(s => selectedSources.includes(s));
+                } else {
+                    matchesSource = selectedSources.every(s => d.sources.includes(s));
+                }
+
+                return matchesTF && matchesEvidence && matchesSource;
+            })
             .map(d => ({
                 target: d.target,
                 evidence: d.evidenceCount,
                 direction: d.direction,
                 sources: d.sources
             }));
-    }, [data, selectedTF, minEvidence]);
+    }, [data, selectedTF, minEvidence, selectedSources, sourceFilterMode]);
 
     // Group targets by biological process
     const groupedTargets = useMemo(() => {
@@ -243,6 +257,62 @@ export default function DirectTargetsView({ data, pathwayMapping, selectedTF, on
                             <option key={tf} value={tf}>{tf}</option>
                         ))}
                     </select>
+
+                    {/* Source Filters with AND/OR toggle */}
+                    <div className="flex items-center gap-2">
+                        {/* AND/OR Toggle */}
+                        <div className="flex items-center bg-slate-800/50 border border-slate-700 rounded-xl p-1">
+                            <button
+                                onClick={() => setSourceFilterMode('OR')}
+                                className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all ${
+                                    sourceFilterMode === 'OR'
+                                        ? 'bg-cyan-500 text-white shadow-lg'
+                                        : 'text-slate-400 hover:text-slate-300'
+                                }`}
+                                title="Show genes regulated by ANY selected source"
+                            >
+                                OR
+                            </button>
+                            <button
+                                onClick={() => setSourceFilterMode('AND')}
+                                className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all ${
+                                    sourceFilterMode === 'AND'
+                                        ? 'bg-orange-500 text-white shadow-lg'
+                                        : 'text-slate-400 hover:text-slate-300'
+                                }`}
+                                title="Show genes regulated by ALL selected sources"
+                            >
+                                AND
+                            </button>
+                        </div>
+
+                        {/* Source Selection Buttons */}
+                        <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2">
+                            {['TARGET', 'DAP', 'CHIP'].map(source => (
+                                <button
+                                    key={source}
+                                    onClick={() => {
+                                        if (selectedSources.includes(source)) {
+                                            setSelectedSources(selectedSources.filter(s => s !== source));
+                                        } else {
+                                            setSelectedSources([...selectedSources, source]);
+                                        }
+                                    }}
+                                    className={`px-2 py-1 rounded text-[10px] font-bold transition-all ${
+                                        selectedSources.includes(source)
+                                            ? source === 'TARGET'
+                                                ? 'bg-emerald-500 text-white'
+                                                : source === 'DAP'
+                                                ? 'bg-blue-500 text-white'
+                                                : 'bg-violet-500 text-white'
+                                            : 'bg-slate-700 text-slate-400'
+                                    }`}
+                                >
+                                    {source}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
 
                     {/* Evidence Filter */}
                     <select

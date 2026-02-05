@@ -13,7 +13,35 @@ export default function PathwayVisualization({ pathwayData, regulatoryData, gene
     const svgRef = useRef<SVGSVGElement>(null);
     const [showLabels, setShowLabels] = useState(true);
     const [highlightRegulated, setHighlightRegulated] = useState(true);
+    const [selectedTF, setSelectedTF] = useState<string>('all');
+    const [selectedSources, setSelectedSources] = useState<string[]>(['TARGET', 'DAP', 'CHIP']);
+    const [sourceFilterMode, setSourceFilterMode] = useState<'OR' | 'AND'>('OR');
     const zoomRef = useRef<any>(null);
+
+    // Get unique TFs for selector
+    const availableTFs = useMemo(() => {
+        if (!regulatoryData) return ['all'];
+        return ['all', ...Array.from(new Set(regulatoryData.map(d => d.tf))).sort()];
+    }, [regulatoryData]);
+
+    // Filter regulatory data based on selected TF and sources
+    const filteredRegulatoryData = useMemo(() => {
+        if (!regulatoryData) return [];
+        return regulatoryData.filter(interaction => {
+            const matchesTF = selectedTF === 'all' || interaction.tf === selectedTF;
+
+            let matchesSource = false;
+            if (sourceFilterMode === 'OR') {
+                // OR mode: interaction must have at least ONE of the selected sources
+                matchesSource = interaction.sources.some(s => selectedSources.includes(s));
+            } else {
+                // AND mode: interaction must have ALL selected sources
+                matchesSource = selectedSources.every(s => interaction.sources.includes(s));
+            }
+
+            return matchesTF && matchesSource;
+        });
+    }, [regulatoryData, selectedTF, selectedSources, sourceFilterMode]);
 
     const nodeContentById = useMemo(() => {
         const map = new Map<string, string[]>();
@@ -29,16 +57,20 @@ export default function PathwayVisualization({ pathwayData, regulatoryData, gene
         return map;
     }, [pathwayData]);
 
+    // Build a set of regulated gene IDs (not symbols)
     const regulatedGenes = useMemo(() => {
         const set = new Set<string>();
-        if (regulatoryData && highlightRegulated) {
-            regulatoryData.forEach((int) => {
+        if (filteredRegulatoryData && highlightRegulated) {
+            filteredRegulatoryData.forEach((int) => {
+                // Add both the ID and the symbol to handle both formats
+                if (int.targetId) set.add(int.targetId.toUpperCase());
+                if (int.tfId) set.add(int.tfId.toUpperCase());
                 set.add(int.target.toUpperCase());
                 set.add(int.tf.toUpperCase());
             });
         }
         return set;
-    }, [regulatoryData, highlightRegulated]);
+    }, [filteredRegulatoryData, highlightRegulated]);
 
     useEffect(() => {
         if (!svgRef.current || !pathwayData) return;
@@ -88,6 +120,7 @@ export default function PathwayVisualization({ pathwayData, regulatoryData, gene
             const nonRegulated: string[] = [];
 
             content.forEach(gene => {
+                if (!gene) return; // Skip undefined/empty genes
                 if (regulatedGenes.has(gene.toUpperCase())) {
                     regulated.push(gene);
                 } else {
@@ -97,6 +130,24 @@ export default function PathwayVisualization({ pathwayData, regulatoryData, gene
 
             return { regulated, nonRegulated };
         };
+
+        // Calculate pathway regions for background clouds
+        const pathwayRegions = {
+            auxin: { nodes: [] as typeof pathwayData.nodes, color: '#3b82f6', name: 'Auxin' },
+            aba: { nodes: [] as typeof pathwayData.nodes, color: '#f97316', name: 'ABA' },
+            jasmonate: { nodes: [] as typeof pathwayData.nodes, color: '#22c55e', name: 'Jasmonate' }
+        };
+
+        pathwayData.nodes.forEach(node => {
+            const role = node.pathway_role;
+            if (role === 'auxin') {
+                pathwayRegions.auxin.nodes.push(node);
+            } else if (role === 'aba' || role === 'aba_4016') {
+                pathwayRegions.aba.nodes.push(node);
+            } else if (role === '4075' || role === '4016') {
+                pathwayRegions.jasmonate.nodes.push(node);
+            }
+        });
 
         // Define gradient for compounds (PhytoLearning style)
         const defs = mainGroup.append('defs');
@@ -109,12 +160,12 @@ export default function PathwayVisualization({ pathwayData, regulatoryData, gene
 
         compoundGradient.append('stop')
             .attr('offset', '0%')
-            .attr('stop-color', '#10b981')
+            .attr('stop-color', '#64748b')
             .attr('stop-opacity', 0.8);
 
         compoundGradient.append('stop')
             .attr('offset', '100%')
-            .attr('stop-color', '#059669')
+            .attr('stop-color', '#475569')
             .attr('stop-opacity', 1);
 
         // Glow filter for regulated genes
@@ -132,6 +183,40 @@ export default function PathwayVisualization({ pathwayData, regulatoryData, gene
         const feMerge = glow.append('feMerge');
         feMerge.append('feMergeNode').attr('in', 'coloredBlur');
         feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
+
+        // Draw pathway background regions (clouds)
+        const backgroundGroup = mainGroup.append('g').attr('class', 'pathway-backgrounds');
+
+        Object.entries(pathwayRegions).forEach(([pathway, data]) => {
+            if (data.nodes.length === 0) return;
+
+            // Calculate bounding box with padding
+            const padding = 40;
+            const xs = data.nodes.map(n => n.x);
+            const ys = data.nodes.map(n => n.y);
+            const widths = data.nodes.map(n => n.width || 46);
+            const heights = data.nodes.map(n => n.height || 17);
+
+            const minX = Math.min(...xs.map((x, i) => x - widths[i] / 2)) - padding;
+            const maxX = Math.max(...xs.map((x, i) => x + widths[i] / 2)) + padding;
+            const minY = Math.min(...ys.map((y, i) => y - heights[i] / 2)) - padding;
+            const maxY = Math.max(...ys.map((y, i) => y + heights[i] / 2)) + padding;
+
+            // Draw rounded rectangle background
+            backgroundGroup.append('rect')
+                .attr('x', minX)
+                .attr('y', minY)
+                .attr('width', maxX - minX)
+                .attr('height', maxY - minY)
+                .attr('rx', 30)
+                .attr('ry', 30)
+                .attr('fill', data.color)
+                .attr('opacity', 0.08)
+                .attr('stroke', data.color)
+                .attr('stroke-width', 2)
+                .attr('stroke-opacity', 0.15)
+                .style('pointer-events', 'none');
+        });
 
         // Draw edges first (so they appear behind nodes)
         const edgeGroup = mainGroup.append('g').attr('class', 'edges');
@@ -182,35 +267,51 @@ export default function PathwayVisualization({ pathwayData, regulatoryData, gene
             const g = nodeGroup.append('g')
                 .attr('transform', `translate(${node.x}, ${node.y})`);
 
-            const regulated = isRegulated(node.node_id);
+            // Only genes can be regulated, not compounds
+            const regulated = node.type === 'gene' ? isRegulated(node.node_id) : false;
             const { regulated: regulatedGenesList, nonRegulated: nonRegulatedGenesList } = getRegulatedGenesInNode(node.node_id);
 
             if (node.type === 'compound') {
-                // Compounds as circles with gradient (PhytoLearning emerald style)
+                // Compounds as circles with neutral gray gradient
                 const circle = g.append('circle')
                     .attr('r', 12)
                     .attr('fill', 'url(#compound-gradient)')
-                    .attr('stroke', '#065f46')
+                    .attr('stroke', '#334155')
                     .attr('stroke-width', 2)
-                    .style('filter', regulated ? 'url(#glow)' : 'none')
                     .style('cursor', 'pointer');
 
                 // Hover effect for compounds
-                circle.on('mouseenter', function() {
+                circle.on('mouseenter', function () {
                     d3.select(this)
                         .transition()
                         .duration(200)
                         .attr('r', 14)
                         .attr('stroke-width', 3)
                         .style('filter', 'url(#glow)');
-                }).on('mouseleave', function() {
+                }).on('mouseleave', function () {
                     d3.select(this)
                         .transition()
                         .duration(200)
                         .attr('r', 12)
                         .attr('stroke-width', 2)
-                        .style('filter', regulated ? 'url(#glow)' : 'none');
+                        .style('filter', 'none');
                 });
+
+                // Compound label above the circle
+                if (showLabels) {
+                    g.append('text')
+                        .text(node.display_name)
+                        .attr('text-anchor', 'middle')
+                        .attr('y', -18) // Position above the circle
+                        .attr('fill', '#e2e8f0') // Light slate color for contrast
+                        .attr('font-size', '11px')
+                        .attr('font-weight', '700')
+                        .attr('font-family', 'Inter, system-ui, sans-serif')
+                        .attr('stroke', '#0f172a') // Dark outline for better readability
+                        .attr('stroke-width', '0.3px')
+                        .attr('paint-order', 'stroke')
+                        .style('pointer-events', 'none');
+                }
             } else {
                 // Genes as rounded rectangles
                 const rectWidth = node.width || 46;
@@ -250,7 +351,7 @@ export default function PathwayVisualization({ pathwayData, regulatoryData, gene
                     .style('pointer-events', 'none') : null;
 
                 // Hover effect for genes
-                mainRect.on('mouseenter', function() {
+                mainRect.on('mouseenter', function () {
                     d3.select(this)
                         .transition()
                         .duration(200)
@@ -265,7 +366,7 @@ export default function PathwayVisualization({ pathwayData, regulatoryData, gene
                     if (label) {
                         label.transition().duration(200).attr('fill', '#d1fae5').attr('font-weight', '700');
                     }
-                }).on('mouseleave', function() {
+                }).on('mouseleave', function () {
                     d3.select(this)
                         .transition()
                         .duration(200)
@@ -355,6 +456,71 @@ export default function PathwayVisualization({ pathwayData, regulatoryData, gene
                 </div>
 
                 <div className="flex items-center gap-3">
+                    {/* TF Selector */}
+                    <select
+                        value={selectedTF}
+                        onChange={(e) => setSelectedTF(e.target.value)}
+                        className="px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-xl text-sm font-bold text-emerald-400 outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+                        <option value="all">All TFs</option>
+                        {availableTFs.filter(tf => tf !== 'all').map(tf => (
+                            <option key={tf} value={tf}>{tf}</option>
+                        ))}
+                    </select>
+
+                    {/* Source Filters with AND/OR toggle */}
+                    <div className="flex items-center gap-2">
+                        {/* AND/OR Toggle */}
+                        <div className="flex items-center bg-slate-800/50 border border-slate-700 rounded-xl p-1">
+                            <button
+                                onClick={() => setSourceFilterMode('OR')}
+                                className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all ${sourceFilterMode === 'OR'
+                                    ? 'bg-cyan-500 text-white shadow-lg'
+                                    : 'text-slate-400 hover:text-slate-300'
+                                    }`}
+                                title="Show genes regulated by ANY selected source"
+                            >
+                                OR
+                            </button>
+                            <button
+                                onClick={() => setSourceFilterMode('AND')}
+                                className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all ${sourceFilterMode === 'AND'
+                                    ? 'bg-orange-500 text-white shadow-lg'
+                                    : 'text-slate-400 hover:text-slate-300'
+                                    }`}
+                                title="Show genes regulated by ALL selected sources"
+                            >
+                                AND
+                            </button>
+                        </div>
+
+                        {/* Source Selection Buttons */}
+                        <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2">
+                            {['TARGET', 'DAP', 'CHIP'].map(source => (
+                                <button
+                                    key={source}
+                                    onClick={() => {
+                                        if (selectedSources.includes(source)) {
+                                            setSelectedSources(selectedSources.filter(s => s !== source));
+                                        } else {
+                                            setSelectedSources([...selectedSources, source]);
+                                        }
+                                    }}
+                                    className={`px-2 py-1 rounded text-[10px] font-bold transition-all ${selectedSources.includes(source)
+                                        ? source === 'TARGET'
+                                            ? 'bg-emerald-500 text-white'
+                                            : source === 'DAP'
+                                                ? 'bg-blue-500 text-white'
+                                                : 'bg-violet-500 text-white'
+                                        : 'bg-slate-700 text-slate-400'
+                                        }`}
+                                >
+                                    {source}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     {/* Zoom Controls */}
                     <div className="flex items-center gap-1 bg-slate-800/50 rounded-xl p-1 border border-slate-700">
                         <button
@@ -383,20 +549,20 @@ export default function PathwayVisualization({ pathwayData, regulatoryData, gene
                     <button
                         onClick={() => setHighlightRegulated(!highlightRegulated)}
                         className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${highlightRegulated
-                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
-                                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                            ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
+                            : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                             }`}
                     >
-                        {highlightRegulated ? '✓ Highlight Regulated' : 'Highlight Regulated'}
+                        {highlightRegulated ? '✓ Highlight' : 'Highlight'}
                     </button>
                     <button
                         onClick={() => setShowLabels(!showLabels)}
                         className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${showLabels
-                                ? 'bg-slate-700 text-white'
-                                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                            ? 'bg-slate-700 text-white'
+                            : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
                             }`}
                     >
-                        {showLabels ? 'Hide Labels' : 'Show Labels'}
+                        {showLabels ? 'Labels' : 'No Labels'}
                     </button>
                 </div>
             </div>
@@ -422,7 +588,7 @@ export default function PathwayVisualization({ pathwayData, regulatoryData, gene
                             <span className="text-xs font-semibold text-slate-300">Gene</span>
                         </div>
                         <div className="flex items-center gap-3">
-                            <div className="w-4 h-4 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600"></div>
+                            <div className="w-4 h-4 rounded-full bg-gradient-to-br from-slate-500 to-slate-600"></div>
                             <span className="text-xs font-semibold text-slate-300">Compound</span>
                         </div>
                         <div className="flex items-center gap-3">
@@ -440,6 +606,23 @@ export default function PathwayVisualization({ pathwayData, regulatoryData, gene
                             <div className="flex items-center gap-2">
                                 <div className="w-6 h-0.5 bg-red-500"></div>
                                 <span className="text-xs font-medium text-slate-300">Repression</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="pt-3 border-t border-slate-700">
+                        <div className="text-xs font-bold uppercase text-slate-400 mb-2">Pathway Regions</div>
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                                <div className="w-6 h-3 rounded" style={{ backgroundColor: '#3b82f6', opacity: 0.3 }}></div>
+                                <span className="text-xs font-medium text-slate-300">Auxin</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-6 h-3 rounded" style={{ backgroundColor: '#f97316', opacity: 0.3 }}></div>
+                                <span className="text-xs font-medium text-slate-300">ABA</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-6 h-3 rounded" style={{ backgroundColor: '#22c55e', opacity: 0.3 }}></div>
+                                <span className="text-xs font-medium text-slate-300">Jasmonate</span>
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { IntegratedInteraction } from '../types';
 import { loadPathwayData, PathwayData } from '../services/pathwayLoader';
@@ -23,6 +23,13 @@ export default function PathwayView({ data }: PathwayViewProps) {
     const [loading, setLoading] = useState(false);
     const [showLabels, setShowLabels] = useState(true);
     const [highlightRegulated, setHighlightRegulated] = useState(true);
+    const [selectedTF, setSelectedTF] = useState<string>('all');
+    const [selectedSources, setSelectedSources] = useState<string[]>(['TARGET', 'DAP', 'CHIP']);
+
+    // Get unique TFs for selector
+    const availableTFs = useMemo(() => {
+        return ['all', ...Array.from(new Set(data.map(d => d.tf))).sort()];
+    }, [data]);
 
     // Load pathway data when hormone changes
     useEffect(() => {
@@ -42,15 +49,24 @@ export default function PathwayView({ data }: PathwayViewProps) {
         loadData();
     }, [selectedHormone]);
 
+    // Filter data based on selected TF and sources
+    const filteredData = useMemo(() => {
+        return data.filter(interaction => {
+            const matchesTF = selectedTF === 'all' || interaction.tf === selectedTF;
+            const matchesSource = interaction.sources.some(s => selectedSources.includes(s));
+            return matchesTF && matchesSource;
+        });
+    }, [data, selectedTF, selectedSources]);
+
     // Build TF → gene mapping from regulatory data
     const tfGeneMap = React.useMemo(() => {
         const map: Record<string, string[]> = {};
-        data.forEach(({ tf, target }) => {
+        filteredData.forEach(({ tf, target }) => {
             if (!map[tf]) map[tf] = [];
             map[tf].push(target);
         });
         return map;
-    }, [data]);
+    }, [filteredData]);
 
     // Render pathway visualization
     useEffect(() => {
@@ -74,12 +90,12 @@ export default function PathwayView({ data }: PathwayViewProps) {
         svg.call(zoom);
 
         // Get regulated genes
-        const regulatedGenes = new Set(data.map(d => d.target));
+        const regulatedGenes = new Set(filteredData.map(d => d.target));
 
         // Find which TFs regulate pathway genes
         const activeTFs = new Set<string>();
         pathwayData.nodeContent.forEach(({ geneId }) => {
-            data.forEach(({ tf, target }) => {
+            filteredData.forEach(({ tf, target }) => {
                 if (geneId.includes(target) || target.includes(geneId)) {
                     activeTFs.add(tf);
                 }
@@ -114,9 +130,12 @@ export default function PathwayView({ data }: PathwayViewProps) {
                 .filter(nc => nc.nodeId === node.nodeId)
                 .map(nc => nc.geneId);
 
-            const hasRegulatedGenes = highlightRegulated && nodeGenes.some(geneId =>
-                Array.from(regulatedGenes).some(rg => geneId.includes(rg) || rg.includes(geneId))
-            );
+            // Only highlight gene nodes (not compounds like IAA, DNA, H2O2)
+            const hasRegulatedGenes = highlightRegulated &&
+                node.type === 'gene' &&
+                nodeGenes.some(geneId =>
+                    Array.from(regulatedGenes).some(rg => geneId.includes(rg) || rg.includes(geneId))
+                );
 
             if (node.type === 'gene') {
                 // Gene group (rectangle)
@@ -154,15 +173,17 @@ export default function PathwayView({ data }: PathwayViewProps) {
                 }
 
             } else if (node.type === 'compound') {
-                // Compound (circle)
+                // Compound (circle) - always neutral gray color
                 const radius = Math.min(node.width, node.height) / 2;
+
+                console.log(`Rendering compound: ${node.displayName}, type: ${node.type}`);
 
                 nodeGroup.append('circle')
                     .attr('cx', node.width / 2)
                     .attr('cy', node.height / 2)
                     .attr('r', radius)
-                    .attr('fill', HORMONE_OPTIONS.find(h => h.value === selectedHormone)?.color || '#64748b')
-                    .attr('stroke', '#1e293b')
+                    .attr('fill', '#64748b')
+                    .attr('stroke', '#475569')
                     .attr('stroke-width', 2);
 
                 if (showLabels) {
@@ -229,7 +250,7 @@ export default function PathwayView({ data }: PathwayViewProps) {
             svg.transition().duration(750).call(zoom.transform as any, d3.zoomIdentity);
         });
 
-    }, [pathwayData, data, showLabels, highlightRegulated, selectedHormone, tfGeneMap]);
+    }, [pathwayData, filteredData, showLabels, highlightRegulated, selectedHormone, tfGeneMap]);
 
     return (
         <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl shadow-2xl border border-slate-700 flex flex-col overflow-hidden h-[800px] relative">
@@ -248,11 +269,50 @@ export default function PathwayView({ data }: PathwayViewProps) {
                 </div>
 
                 <div className="flex items-center gap-3">
+                    {/* TF Selector */}
+                    <select
+                        value={selectedTF}
+                        onChange={(e) => setSelectedTF(e.target.value)}
+                        className="px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-xl text-sm font-bold text-emerald-400 outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+                        <option value="all">All TFs</option>
+                        {availableTFs.filter(tf => tf !== 'all').map(tf => (
+                            <option key={tf} value={tf}>{tf}</option>
+                        ))}
+                    </select>
+
+                    {/* Source Filters */}
+                    <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2">
+                        {['TARGET', 'DAP', 'CHIP'].map(source => (
+                            <button
+                                key={source}
+                                onClick={() => {
+                                    if (selectedSources.includes(source)) {
+                                        setSelectedSources(selectedSources.filter(s => s !== source));
+                                    } else {
+                                        setSelectedSources([...selectedSources, source]);
+                                    }
+                                }}
+                                className={`px-2 py-1 rounded text-[10px] font-bold transition-all ${
+                                    selectedSources.includes(source)
+                                        ? source === 'TARGET'
+                                            ? 'bg-emerald-500 text-white'
+                                            : source === 'DAP'
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-violet-500 text-white'
+                                        : 'bg-slate-700 text-slate-400'
+                                }`}
+                            >
+                                {source}
+                            </button>
+                        ))}
+                    </div>
+
                     {/* Hormone Selector */}
                     <select
                         value={selectedHormone}
                         onChange={(e) => setSelectedHormone(e.target.value as Hormone)}
-                        className="px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-xl text-sm font-bold text-emerald-400 outline-none focus:ring-2 focus:ring-emerald-500"
+                        className="px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-xl text-sm font-bold text-cyan-400 outline-none focus:ring-2 focus:ring-cyan-500"
                         disabled={loading}
                     >
                         {HORMONE_OPTIONS.map(option => (
@@ -270,7 +330,7 @@ export default function PathwayView({ data }: PathwayViewProps) {
                                 : 'bg-slate-800 border-slate-700 text-slate-400 border'
                             }`}
                     >
-                        {highlightRegulated ? '✓ Highlight Regulated' : 'Highlight Regulated'}
+                        {highlightRegulated ? '✓ Highlight' : 'Highlight'}
                     </button>
 
                     {/* Show Labels Toggle */}
@@ -281,7 +341,7 @@ export default function PathwayView({ data }: PathwayViewProps) {
                                 : 'bg-slate-800 border-slate-700 text-slate-400 border'
                             }`}
                     >
-                        {showLabels ? 'Hide Labels' : 'Show Labels'}
+                        {showLabels ? 'Labels' : 'No Labels'}
                     </button>
                 </div>
             </div>
@@ -297,7 +357,7 @@ export default function PathwayView({ data }: PathwayViewProps) {
                             <span>Gene Group</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: HORMONE_OPTIONS.find(h => h.value === selectedHormone)?.color }}></div>
+                            <div className="w-4 h-4 rounded-full bg-slate-500"></div>
                             <span>Compound</span>
                         </div>
                         <div className="flex items-center gap-2">

@@ -5,25 +5,33 @@ import HierarchicalView from './HierarchicalView';
 import PathwayVisualization from './PathwayVisualization';
 import { PathwayData } from '../services/pathwayLoader';
 
+export type NetworkView = 'direct' | 'hierarchical' | 'pathway';
+
 interface NetworkVisualizationProps {
     data: IntegratedInteraction[];
     pathwayMapping: PathwayMapping;
     pathwayData?: PathwayData | null;
     geneMapping?: Record<string, string>;
+    onViewChange?: (view: NetworkView) => void;
 }
 
-type NetworkView = 'direct' | 'hierarchical' | 'pathway';
-
-export default function NetworkVisualization({ data, pathwayMapping, pathwayData, geneMapping }: NetworkVisualizationProps) {
+export default function NetworkVisualization({ data, pathwayMapping, pathwayData, geneMapping, onViewChange }: NetworkVisualizationProps) {
     const [view, setView] = useState<NetworkView>('direct');
     const [selectedTF, setSelectedTF] = useState('');
+
+    const handleViewChange = (newView: NetworkView) => {
+        setView(newView);
+        if (onViewChange) {
+            onViewChange(newView);
+        }
+    };
 
     return (
         <div className="space-y-6">
             {/* View Selector */}
             <div className="bg-slate-900/50 backdrop-blur-xl rounded-2xl border border-slate-700 p-2 flex items-center gap-2 w-fit shadow-lg">
                 <button
-                    onClick={() => setView('direct')}
+                    onClick={() => handleViewChange('direct')}
                     className={`px-6 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${view === 'direct'
                             ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30'
                             : 'text-slate-400 hover:bg-slate-800'
@@ -36,7 +44,7 @@ export default function NetworkVisualization({ data, pathwayMapping, pathwayData
                 </button>
 
                 <button
-                    onClick={() => setView('hierarchical')}
+                    onClick={() => handleViewChange('hierarchical')}
                     className={`px-6 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${view === 'hierarchical'
                             ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30'
                             : 'text-slate-400 hover:bg-slate-800'
@@ -49,7 +57,7 @@ export default function NetworkVisualization({ data, pathwayMapping, pathwayData
                 </button>
 
                 <button
-                    onClick={() => setView('pathway')}
+                    onClick={() => handleViewChange('pathway')}
                     className={`px-6 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${view === 'pathway'
                             ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30'
                             : 'text-slate-400 hover:bg-slate-800'

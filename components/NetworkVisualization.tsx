@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { IntegratedInteraction, PathwayMapping } from '../types';
 import DirectTargetsView from './DirectTargetsView';
 import HierarchicalView from './HierarchicalView';
+import PathwayVisualization from './PathwayVisualization';
 import { PathwayData } from '../services/pathwayLoader';
 
 interface NetworkVisualizationProps {
@@ -80,13 +81,20 @@ export default function NetworkVisualization({ data, pathwayMapping, pathwayData
             )}
 
             {view === 'pathway' && (
-                <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl shadow-2xl border border-slate-700 flex items-center justify-center h-[800px]">
-                    <div className="text-center px-6">
-                        <div className="text-6xl mb-4">🚧</div>
-                        <div className="text-xl font-bold text-amber-300">Pathway network visualization is under construction</div>
-                        <div className="text-sm text-slate-400 mt-2">We are working on this section. It will be available soon.</div>
+                pathwayData ? (
+                    <PathwayVisualization
+                        pathwayData={pathwayData}
+                        regulatoryData={data}
+                    />
+                ) : (
+                    <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl shadow-2xl border border-slate-700 flex items-center justify-center h-[800px]">
+                        <div className="text-center">
+                            <div className="text-6xl mb-4">🧬</div>
+                            <div className="text-xl font-bold text-slate-400">No pathway selected</div>
+                            <div className="text-sm text-slate-500 mt-2">Select a pathway from the sidebar to view</div>
+                        </div>
                     </div>
-                </div>
+                )
             )}
         </div>
     );

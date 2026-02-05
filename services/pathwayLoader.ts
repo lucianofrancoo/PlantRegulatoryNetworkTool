@@ -42,12 +42,6 @@ export interface PathwayData {
 const AVAILABLE_PATHWAYS = [
     { id: 'aba', name: 'ABA Response', dir: 'aba' },
     { id: 'auxin', name: 'Auxin Signaling', dir: 'auxin' },
-    { id: 'ethylene', name: 'Ethylene', dir: 'ethylene' },
-    { id: 'cytokinin', name: 'Cytokinin', dir: 'cytokinin' },
-    { id: 'gibberellin', name: 'Gibberellin', dir: 'gibberellin' },
-    { id: 'brassinosteroid', name: 'Brassinosteroid', dir: 'brassinosteroid' },
-    { id: 'jasmonic_acid', name: 'Jasmonic Acid', dir: 'jasmonic_acid' },
-    { id: 'salicylic_acid', name: 'Salicylic Acid', dir: 'salicylic_acid' },
     { id: 'water_deprivation', name: 'Water Deprivation', dir: 'water_deprivation' },
     { id: 'osmotic_stress', name: 'Osmotic Stress', dir: 'osmotic_stress' }
 ];

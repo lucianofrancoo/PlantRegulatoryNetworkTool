@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { PathwayData } from '../services/pathwayLoader';
 import { IntegratedInteraction } from '../types';
@@ -12,31 +12,6 @@ export default function PathwayVisualization({ pathwayData, regulatoryData }: Pa
     const svgRef = useRef<SVGSVGElement>(null);
     const [showLabels, setShowLabels] = useState(true);
     const [highlightRegulated, setHighlightRegulated] = useState(true);
-
-    const nodeContentById = useMemo(() => {
-        const map = new Map<string, string[]>();
-        if (!pathwayData) return map;
-        pathwayData.nodeContent.forEach((nc) => {
-            const list = map.get(nc.node_id);
-            if (list) {
-                list.push(nc.gene_or_compound_id);
-            } else {
-                map.set(nc.node_id, [nc.gene_or_compound_id]);
-            }
-        });
-        return map;
-    }, [pathwayData]);
-
-    const regulatedGenes = useMemo(() => {
-        const set = new Set<string>();
-        if (regulatoryData && highlightRegulated) {
-            regulatoryData.forEach((int) => {
-                set.add(int.target.toUpperCase());
-                set.add(int.tf.toUpperCase());
-            });
-        }
-        return set;
-    }, [regulatoryData, highlightRegulated]);
 
     useEffect(() => {
         if (!svgRef.current || !pathwayData) return;
@@ -57,13 +32,19 @@ export default function PathwayVisualization({ pathwayData, regulatoryData }: Pa
 
         svg.attr('viewBox', `${minX} ${minY} ${width} ${height}`);
 
+        // Create regulated genes set for highlighting
+        const regulatedGenes = new Set<string>();
+        if (regulatoryData && highlightRegulated) {
+            regulatoryData.forEach(int => {
+                regulatedGenes.add(int.target.toUpperCase());
+                regulatedGenes.add(int.tf.toUpperCase());
+            });
+        }
+
         // Check if a node has regulatory data
         const isRegulated = (nodeId: string): boolean => {
-            const content = nodeContentById.get(nodeId) || [];
-            for (const gene of content) {
-                if (regulatedGenes.has(gene.toUpperCase())) return true;
-            }
-            return false;
+            const content = pathwayData.nodeContent.filter(nc => nc.node_id === nodeId);
+            return content.some(nc => regulatedGenes.has(nc.gene_or_compound_id.toUpperCase()));
         };
 
         // Define gradient for compounds (PhytoLearning style)
@@ -204,13 +185,15 @@ export default function PathwayVisualization({ pathwayData, regulatoryData }: Pa
             // Tooltip on hover
             g.append('title')
                 .text(() => {
-                    const genes = (nodeContentById.get(node.node_id) || [])
+                    const genes = pathwayData.nodeContent
+                        .filter(nc => nc.node_id === node.node_id)
+                        .map(nc => nc.gene_or_compound_id)
                         .join(', ');
                     return `${node.display_name}\n${genes}${regulated ? '\n✓ Has regulatory data' : ''}`;
                 });
         });
 
-    }, [pathwayData, regulatedGenes, showLabels, highlightRegulated, nodeContentById]);
+    }, [pathwayData, regulatoryData, showLabels, highlightRegulated]);
 
     return (
         <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl shadow-2xl border border-slate-700 flex flex-col overflow-hidden h-[800px] relative">

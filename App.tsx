@@ -230,21 +230,17 @@ const App: React.FC = () => {
           <div className="pt-6 border-t border-slate-800 mt-4 space-y-4">
             <div className="text-[10px] uppercase tracking-widest text-slate-500 font-black">Affiliations</div>
             <div className="p-4 rounded-2xl bg-slate-500/70 border border-slate-400/70">
-              <div className="flex items-center justify-between gap-6">
-                <div className="flex-1 flex items-center justify-center">
-                  <img
-                    src="/logos/Logo Lab (transparent bg).png"
-                    alt="Plant Genome Regulation Laboratory"
-                    className="h-20 w-auto object-contain opacity-100"
-                  />
-                </div>
-                <div className="flex-1 flex items-center justify-center">
-                  <img
-                    src="/logos/2025 - Logo PhytoLearning sin fondo (1).png"
-                    alt="Nucleo Milenio PhytoLearning"
-                    className="h-20 w-auto object-contain opacity-100 scale-[2]"
-                  />
-                </div>
+              <div className="flex flex-col items-center gap-4">
+                <img
+                  src="/logos/Logo Lab (transparent bg).png"
+                  alt="Plant Genome Regulation Laboratory"
+                  className="h-20 w-auto object-contain opacity-100"
+                />
+                <img
+                  src="/logos/2025 - Logo PhytoLearning sin fondo (1).png"
+                  alt="Nucleo Milenio PhytoLearning"
+                  className="h-20 w-auto object-contain opacity-100 scale-[1.5]"
+                />
               </div>
             </div>
           </div>

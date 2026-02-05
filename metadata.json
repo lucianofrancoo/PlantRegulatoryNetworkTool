@@ -1,5 +1,0 @@
-{
-  "name": "The Final GeneReg Integrator",
-  "description": "A professional tool for integrating and analyzing gene regulation data from multiple evidence sources. Upload TF-Target pairs, visualize regulatory networks, and use Gemini AI to interpret biological significance.",
-  "requestFramePermissions": []
-}

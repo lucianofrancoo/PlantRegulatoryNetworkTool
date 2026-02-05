@@ -20,7 +20,7 @@ const StatsPanel: React.FC<StatsPanelProps> = ({ data }) => {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
       <div className="bg-slate-900/50 backdrop-blur-xl p-6 rounded-3xl shadow-2xl border border-slate-800">
         <h3 className="text-lg font-bold mb-4 text-emerald-400">Evidence Distribution</h3>
-        <div className="h-64">
+        <div className="h-64 min-h-64 min-w-0 w-full" style={{ minHeight: 256 }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={evidenceCounts}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" />

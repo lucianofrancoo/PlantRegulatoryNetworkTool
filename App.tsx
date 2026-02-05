@@ -211,6 +211,12 @@ const App: React.FC = () => {
             </svg>
             Network View
           </button>
+          <button onClick={() => setActiveView('enrichment')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${activeView === 'enrichment' ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30' : 'hover:bg-slate-800 text-slate-400'}`}>
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h10M4 18h10" />
+            </svg>
+            Enrichment
+          </button>
 
           <div className="pt-6 border-t border-slate-800 mt-4">
             <PathwaySelector onPathwayChange={setPathwayData} />
@@ -269,12 +275,6 @@ const App: React.FC = () => {
           {activeView === 'explorer' ? (
             <div className="space-y-6 animate-in fade-in duration-500">
               <StatsPanel data={filteredData} />
-              <EnrichmentPanel
-                data={filteredData}
-                selectedSources={selectedSources}
-                minConfidence={minConfidence}
-                goAnnotations={goAnnotations}
-              />
               <div className="bg-slate-900/50 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-800 overflow-hidden">
                 <div className="p-6 border-b border-slate-800 bg-slate-900/30 flex items-center justify-between">
                   <input type="text" placeholder="Search gene, TF or keyword..." className="max-w-xs w-full pl-4 pr-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-2xl text-sm outline-none shadow-sm focus:ring-2 focus:ring-emerald-500 text-slate-200 placeholder-slate-500" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
@@ -342,6 +342,15 @@ const App: React.FC = () => {
               pathwayData={pathwayData}
               geneMapping={geneMapping}
             />
+          ) : activeView === 'enrichment' ? (
+            <div className="space-y-6 animate-in fade-in duration-500">
+              <EnrichmentPanel
+                data={filteredData}
+                selectedSources={selectedSources}
+                minConfidence={minConfidence}
+                goAnnotations={goAnnotations}
+              />
+            </div>
           ) : (
             <div className="bg-white p-12 rounded-[48px] border border-slate-100 shadow-2xl max-w-4xl mx-auto mt-10 animate-in zoom-in-95 duration-500">
               <h3 className="text-3xl font-black mb-8 text-slate-900 tracking-tight">Interpretación Funcional (AI)</h3>

@@ -43,7 +43,9 @@ const AVAILABLE_PATHWAYS = [
     { id: 'aba', name: 'ABA Response', dir: 'aba' },
     { id: 'auxin', name: 'Auxin Signaling', dir: 'auxin' },
     { id: 'water_deprivation', name: 'Water Deprivation', dir: 'water_deprivation' },
-    { id: 'osmotic_stress', name: 'Osmotic Stress', dir: 'osmotic_stress' }
+    { id: 'osmotic_stress', name: 'Osmotic Stress', dir: 'osmotic_stress' },
+    { id: 'hormone_signaling', name: '🌿 Integrated Hormone Signaling (Auxin + ABA + Jasmonate + MAPK)', dir: 'hormone_signaling' }
+    // More pathways can be added here in the future
 ];
 
 export async function loadPathway(pathwayId: string): Promise<PathwayData | null> {

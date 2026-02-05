@@ -1,0 +1,53 @@
+from	to	type	regulation	subtype
+110	49	PPrel	repression	inhibition,ubiquitination
+126	auxin_PROC_PLANT_GROWTH	GErel	other	
+127	auxin_PROC_PLANT_GROWTH	GErel	other	
+128	auxin_PROC_PLANT_GROWTH	GErel	other	
+136	110	PPrel	activation	activation
+14	136	PPrel	other	compound
+14	181	PPrel	other	compound
+180	183	PPrel	activation	activation,phosphorylation
+180	186	PPrel	activation	activation,phosphorylation
+180	187	PPrel	repression	inhibition,phosphorylation
+180	49	PPrel	activation	activation,phosphorylation
+181	180	PPrel	activation	activation
+183	185	PPrel	other	
+186	197	PPrel	activation	activation,phosphorylation
+187	auxin_PROC_AUXIN_BIOSYN	GErel	other	
+49	51	PPrel	repression	inhibition
+51	auxin_DNA_auxin	GErel	other	
+auxin_DNA_auxin	126	GErel	other	
+auxin_DNA_auxin	127	GErel	other	
+auxin_DNA_auxin	128	GErel	other	
+aba_137	aba_DNA_aba	GErel	activation	expression
+aba_16	aba_60	PCrel	other	
+aba_60	62_aba	PPrel	repression	inhibition
+62_aba	aba_67	PPrel	repression	inhibition,dephosphorylation
+aba_67	aba_137	PPrel	activation	activation
+aba_DNA_aba	aba_PROC_STOMATAL_CLOSURE	GErel	activation	expression
+180	62_aba	PPrel	repression	inhibition,phosphorylation
+4016_137	4016_227	PPrel	activation	activation,phosphorylation
+4016_140	4016_137	PPrel	activation	activation
+aba_67	4016_140	PPrel	activation	activation,indirect effect
+4016_171	4016_172	PPrel	activation	activation,phosphorylation
+4016_172	4016_COMP_H2O2	PPrel	activation	activation
+4016_177	4016_COMP_H2O2	PPrel	repression	inhibition
+4016_227	4016_PROC_STRESS_ADAPT	GErel	activation	activation
+aba_16	4016_GENE_UNKNOWN	PPrel	activation	activation
+4016_COMP_H2O2	4016_DNA_aba_mapk	GErel	activation	activation
+4016_COMP_H2O2	4016_PROC_STRESS_TOL	GErel	activation	activation
+4016_DNA_aba_mapk	4016_177	GErel	activation	activation
+4016_GENE_UNKNOWN	4016_171	PPrel	activation	activation
+186	4016_172	PPrel	activation	activation,phosphorylation
+120	88	PPrel	repression	inhibition,ubiquitination
+25	99	PPrel	activation	activation
+27	DNA_jasmonate	GErel	activation	expression
+88	27	PPrel	other	dissociation
+97	120	PCrel	other	
+99	97	PPrel	activation	activation
+DNA_jasmonate	PROC_SENESCENCE	GErel	activation	expression
+27	4016_PROC_ROOT_GROWTH	GErel	activation	activation
+4016_137	4016_172	PPrel	activation	activation,phosphorylation
+4016_172	27	PPrel	repression	inhibition,phosphorylation
+25	jas_4016_GENE_UNKNOWN	PPrel	activation	activation
+jas_4016_GENE_UNKNOWN	4016_137	PPrel	activation	activation,phosphorylation

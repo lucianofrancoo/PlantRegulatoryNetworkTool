@@ -13,6 +13,7 @@ const App: React.FC = () => {
   const [pathwayMapping, setPathwayMapping] = useState<PathwayMapping>({});
   const [goAnnotations, setGoAnnotations] = useState<Record<string, string[]>>({});
   const [hubMapping, setHubMapping] = useState<HubMapping>({});
+  const [geneMapping, setGeneMapping] = useState<Record<string, string>>({});
 
   const [loading, setLoading] = useState(true);
   const [loadingMsg, setLoadingMsg] = useState("Initializing GeneReg Integrator...");
@@ -51,6 +52,7 @@ const App: React.FC = () => {
         setData(result.interactions);
         setPathwayMapping(result.pathwayMapping);
         setGoAnnotations(result.goAnnotations || {});
+        setGeneMapping(result.geneMapping || {});
         // If hub mapping was loaded, we would set it here. For now empty.
         setHubMapping({});
       } catch (e) {
@@ -331,6 +333,7 @@ const App: React.FC = () => {
               data={filteredData}
               pathwayMapping={pathwayMapping}
               pathwayData={pathwayData}
+              geneMapping={geneMapping}
             />
           ) : (
             <div className="bg-white p-12 rounded-[48px] border border-slate-100 shadow-2xl max-w-4xl mx-auto mt-10 animate-in zoom-in-95 duration-500">

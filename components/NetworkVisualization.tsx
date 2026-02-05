@@ -9,11 +9,12 @@ interface NetworkVisualizationProps {
     data: IntegratedInteraction[];
     pathwayMapping: PathwayMapping;
     pathwayData?: PathwayData | null;
+    geneMapping?: Record<string, string>;
 }
 
 type NetworkView = 'direct' | 'hierarchical' | 'pathway';
 
-export default function NetworkVisualization({ data, pathwayMapping, pathwayData }: NetworkVisualizationProps) {
+export default function NetworkVisualization({ data, pathwayMapping, pathwayData, geneMapping }: NetworkVisualizationProps) {
     const [view, setView] = useState<NetworkView>('direct');
     const [selectedTF, setSelectedTF] = useState('');
 
@@ -85,6 +86,7 @@ export default function NetworkVisualization({ data, pathwayMapping, pathwayData
                     <PathwayVisualization
                         pathwayData={pathwayData}
                         regulatoryData={data}
+                        geneMapping={geneMapping || {}}
                     />
                 ) : (
                     <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl shadow-2xl border border-slate-700 flex items-center justify-center h-[800px]">
